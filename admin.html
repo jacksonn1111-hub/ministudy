@@ -60,7 +60,6 @@ tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{backgrou
 .setup-page{max-width:520px;margin:60px auto;padding:24px}
 .setup-page h2{font-size:20px;font-weight:800;margin-bottom:8px}
 .setup-page p{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8}
-.setup-page ol{font-size:13px;color:var(--text2);margin:0 0 20px 20px;line-height:2.2}
 .setup-page .url-input{width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:12px}
 .setup-page .url-input:focus{outline:none;border-color:var(--blue)}
 .conn{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:6px}
@@ -72,41 +71,28 @@ tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{backgrou
 <div id="root"></div>
 <div class="toast" id="toast"></div>
 <script>
-let API=localStorage.getItem('mast_api')||'https://script.google.com/macros/s/AKfycbwpzHsmHgM6Fcp_SvkduhwalTo_zSOEj1SwyGI9Ph0HV1Z_Iksyy_x_dvaIlQm3OhMYKA/exec',page='subjects',D={},loading=false,connected=false,dashFilter='';
+let API=localStorage.getItem('mast_api')||'https://script.google.com/macros/s/AKfycbwpzHsmHgM6Fcp_SvkduhwalTo_zSOEj1SwyGI9Ph0HV1Z_Iksyy_x_dvaIlQm3OhMYKA/exec';
+let page='subjects',D={},loading=false,connected=false,dashFilter='';
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-
 async function apiGet(){if(!API)return{};const r=await fetch(API+'?action=getAll');return r.json()}
 async function apiSave(k,v){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'save',key:k,value:v}),redirect:'follow'}).catch(()=>{})}
 async function apiDel(k){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'delete',key:k}),redirect:'follow'}).catch(()=>{})}
-
-async function loadData(){loading=true;render();try{D=await apiGet();connected=true}catch(e){connected=false;toast('연결 실패')}loading=false;render()}
+async function loadData(){loading=true;render();try{D=await apiGet();connected=true}catch{connected=false;toast('연결 실패')}loading=false;render()}
 function subjs(){return D.subjects||[]}
 function cfg(id){return D['config_'+id]||null}
 function res(id){return D['results_'+id]||null}
 
 function render(){
   const root=document.getElementById('root');
-  if(!API){root.innerHTML=setupPage();return}
-  let h=header();
+  if(!API){root.innerHTML=`<div class="setup-page"><h2>🔗 서버 연결</h2><p>Apps Script 웹 앱 URL을 붙여넣으세요.</p><input class="url-input" id="sUrl" placeholder="https://script.google.com/macros/s/..."><button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="saveApi()">연결하기</button></div>`;return}
+  let h=`<div class="header"><div><h1><span class="icon">📋</span> 최성보 관리자</h1>
+  <div style="font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px">과목 등록 · 대상자 현황
+  <span class="conn ${connected?'conn-ok':'conn-fail'}">● ${connected?'연결됨':'끊김'}</span></div></div>
+  <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙ 연결</button></div></div>`;
   h+=`<div class="nav">${[{id:'subjects',l:'과목 관리'},{id:'dashboard',l:'대상자 현황'}].map(p=>`<button class="${page===p.id?'active':''}" onclick="page='${p.id}';render()">${p.l}${p.id==='subjects'&&subjs().length?`<span class="badge badge-blue" style="margin-left:6px">${subjs().length}</span>`:''}</button>`).join('')}</div>`;
   h+=`<div class="container">${loading?'<div class="loading">불러오는 중</div>':(page==='subjects'?subjPage():dashPage())}</div>`;
   root.innerHTML=h;
-}
-
-function header(){
-  return`<div class="header"><div><h1><span class="icon">📋</span> 최성보 관리자</h1>
-  <div style="font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px">과목 등록 · 대상자 현황
-  <span class="conn ${connected?'conn-ok':'conn-fail'}">● ${connected?'연결됨':'끊김'}</span></div></div>
-  <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙ 연결설정</button></div></div>`;
-}
-
-function setupPage(){
-  return`<div class="setup-page"><h2>🔗 서버 연결</h2>
-  <p>Google 스프레드시트에 Apps Script를 배포하고, 웹 앱 URL을 붙여넣으세요.</p>
-  <ol><li>새 Google 스프레드시트 만들기</li><li>확장 프로그램 → Apps Script</li><li>제공된 코드 붙여넣기 → 저장</li><li>배포 → 새 배포 → 웹 앱 (누구나)</li><li>웹 앱 URL 복사</li></ol>
-  <input class="url-input" id="sUrl" placeholder="https://script.google.com/macros/s/...">
-  <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="saveApi()">연결하기</button></div>`;
 }
 
 function subjPage(){
@@ -115,17 +101,22 @@ function subjPage(){
   <div class="form-row">
     <div class="form-group" style="flex:1"><label>과목명 *</label><input id="iN" placeholder="예: 국어" onkeydown="if(event.key==='Enter')addS()"></div>
     <div class="form-group" style="flex:1"><label>담당 선생님</label><input id="iT" placeholder="예: 홍길동" onkeydown="if(event.key==='Enter')addS()"></div>
+    <div class="form-group" style="min-width:130px"><label>평가유형</label><select id="iE">
+      <option value="both">성적 + 출결</option><option value="attendanceOnly">출결만</option></select></div>
     <button class="btn btn-primary" onclick="addS()" style="margin-top:auto">+ 추가</button>
   </div></div>`;
+
   h+=`<div class="card"><div class="card-header"><span class="card-title">등록 과목 (${ss.length})</span></div>`;
-  if(!ss.length){h+=`<div class="empty">등록된 과목이 없습니다</div>`}
+  if(!ss.length)h+=`<div class="empty">등록된 과목이 없습니다</div>`;
   else ss.forEach((s,i)=>{
     const c=cfg(s.id),r=res(s.id),hasR=r?.students?.length>0,tN=hasR?r.students.filter(x=>x.isTarget).length:0;
+    const evLabel=s.evalType==='attendanceOnly'?'출결만':'성적+출결';
     h+=`<div class="subj-item"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
       <span style="color:var(--text3);font-size:12px;min-width:20px">${i+1}</span>
       <strong>${esc(s.name)}</strong><span style="font-size:12px;color:var(--text2)">${esc(s.teacher||'미지정')}</span>
-      ${c?'<span class="badge badge-green">설정완료</span>':'<span class="badge badge-slate">미설정</span>'}
-      ${hasR?`<span class="badge badge-blue">${r.students.length}명</span>`:''}
+      <span class="badge ${s.evalType==='attendanceOnly'?'badge-green':'badge-blue'}">${evLabel}</span>
+      ${c?'<span class="badge badge-green">설정완료</span>':''}
+      ${hasR?`<span class="badge badge-amber">${r.students.length}명</span>`:''}
       ${tN>0?`<span class="badge badge-red">대상자 ${tN}</span>`:''}
     </div><div class="btn-group" style="flex-shrink:0">
       <button class="btn btn-outline btn-sm" onclick="editS('${s.id}')">수정</button>
@@ -152,32 +143,42 @@ function dashPage(){
     <button class="btn btn-success btn-sm" onclick="expAll()">📥 전과목 엑셀</button></div>
     <div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th class="tc">유형</th><th class="tc">상태</th><th class="tr">학생</th><th class="tr">미달</th><th class="tr">대상자</th></tr></thead><tbody>`;
   st.forEach(({s,c,tot,mid,tgt,up})=>{
+    const evL=s.evalType==='attendanceOnly'?'출결만':'성적+출결';
     h+=`<tr><td style="font-weight:600">${esc(s.name)}</td><td>${esc(s.teacher||'—')}</td>
-    <td class="tc">${c?`<span class="badge ${c.evalType==='both'?'badge-blue':'badge-green'}">${c.evalType==='both'?'성적+출결':'출결만'}</span>`:'<span class="badge badge-slate">미설정</span>'}</td>
+    <td class="tc"><span class="badge ${s.evalType==='attendanceOnly'?'badge-green':'badge-blue'}">${evL}</span></td>
     <td class="tc">${up?'<span class="badge badge-green">완료</span>':'<span class="badge badge-slate">대기</span>'}</td>
     <td class="tr">${up?tot:'—'}</td><td class="tr">${up?mid:'—'}</td>
     <td class="tr" style="font-weight:700;${tgt>0?'color:var(--red)':''}">${up?tgt:'—'}</td></tr>`;
   });
   h+=`</tbody></table></div></div>`;
-
   h+=`<div class="card"><div class="card-header"><span class="card-title">최종 대상자 (${tT}명)</span>
-    <div class="form-group" style="min-width:130px"><select onchange="dashFilter=this.value;render()">
-      <option value="">전체</option>${ss.map(s=>`<option value="${s.name}" ${dashFilter===s.name?'selected':''}>${esc(s.name)}</option>`).join('')}
-    </select></div></div>`;
+    <div class="form-group" style="min-width:130px"><select onchange="dashFilter=this.value;render()"><option value="">전체</option>${ss.map(s=>`<option value="${s.name}" ${dashFilter===s.name?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div></div>`;
   const fl=dashFilter?allT.filter(t=>t.sn===dashFilter):allT;
-  if(!fl.length){h+=`<div class="empty">${tT?'해당 과목에 대상자 없음':'대상자 없음'}</div>`}
+  if(!fl.length)h+=`<div class="empty">${tT?'해당 과목에 대상자 없음':'대상자 없음'}</div>`;
   else{h+=`<div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th>반</th><th>번호</th><th>성명</th><th class="tc">사유</th></tr></thead><tbody>`;
     fl.forEach(t=>{h+=`<tr class="row-target"><td>${esc(t.sn)}</td><td>${esc(t.tc||'—')}</td><td>${esc(t.class)}</td><td>${t.num}</td><td style="font-weight:600">${esc(t.name)}</td><td class="tc">${(t.reasons||[]).map(r=>`<span class="badge badge-red">${r}</span>`).join(' ')}</td></tr>`});
     h+=`</tbody></table></div>`}
   h+=`</div>`;return h;
 }
 
-async function addS(){const n=document.getElementById('iN'),t=document.getElementById('iT');const nm=n.value.trim(),tc=t.value.trim();
-  if(!nm)return toast('과목명 입력');const ss=subjs();const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  ss.push({id,name:nm,teacher:tc});D.subjects=ss;n.value='';t.value='';render();await apiSave('subjects',ss);toast(`"${nm}" 추가`)}
+async function addS(){const n=document.getElementById('iN'),t=document.getElementById('iT'),e=document.getElementById('iE');
+  const nm=n.value.trim(),tc=t.value.trim(),ev=e.value;
+  if(!nm)return toast('과목명 입력');const ss=subjs();
+  ss.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:nm,teacher:tc,evalType:ev});
+  D.subjects=ss;n.value='';t.value='';render();await apiSave('subjects',ss);toast(`"${nm}" 추가`)}
+
 async function editS(id){const ss=subjs(),s=ss.find(x=>x.id===id);if(!s)return;
-  const nm=prompt('과목명:',s.name);if(nm===null)return;const tc=prompt('담당 선생님:',s.teacher||'');if(tc===null)return;
-  s.name=nm.trim()||s.name;s.teacher=tc.trim();D.subjects=ss;render();await apiSave('subjects',ss);toast('수정 완료')}
+  const nm=prompt('과목명:',s.name);if(nm===null)return;
+  const tc=prompt('담당 선생님:',s.teacher||'');if(tc===null)return;
+  const evOpts=['성적+출결','출결만'];const evVals=['both','attendanceOnly'];
+  const curIdx=evVals.indexOf(s.evalType||'both');
+  const evPick=prompt(`평가유형 (1:성적+출결, 2:출결만):`,curIdx+1);
+  if(evPick===null)return;
+  const evIdx=parseInt(evPick)-1;
+  s.name=nm.trim()||s.name;s.teacher=tc.trim();
+  if(evIdx>=0&&evIdx<2)s.evalType=evVals[evIdx];
+  D.subjects=ss;render();await apiSave('subjects',ss);toast('수정 완료')}
+
 async function delS(id){if(!confirm('삭제하시겠습니까?'))return;D.subjects=subjs().filter(s=>s.id!==id);delete D['config_'+id];delete D['results_'+id];
   render();await apiSave('subjects',D.subjects);await apiDel('config_'+id);await apiDel('results_'+id);toast('삭제 완료')}
 function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
@@ -185,10 +186,10 @@ function chgApi(){const u=prompt('Apps Script URL:',API);if(u===null)return;API=
 
 function expAll(){
   const wb=XLSX.utils.book_new();let has=false;const tgts=[];
-  subjs().forEach(s=>{const c=cfg(s.id),r=res(s.id);if(!r?.students?.length)return;const ib=c?.evalType==='both';
-    const rows=r.students.map(x=>{const row={'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name};
-      if(ib){row['환산']=x.converted;row['기준']=c.threshold;row['성적']=x.gradeTarget?'미달':'도달'}
-      row['출석']=x.attend??'';row['기준']=x.threshold23;row['출결']=x.attendTarget?'미달':(x.attend!=null?'충족':'');
+  subjs().forEach(s=>{const c=cfg(s.id),r=res(s.id);if(!r?.students?.length)return;const ib=(s.evalType||'both')!=='attendanceOnly';
+    const rows=r.students.map(x=>{const row={'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'상태':x.status||'재학'};
+      if(ib){row['환산']=x.converted;row['기준']=c?.threshold;row['성적']=x.gradeTarget?'미달':'도달'}
+      row['출석']=x.attend??'';row['출석기준']=x.threshold23;row['출결']=x.attendTarget?'미달':(x.attend!=null?'충족':'');
       row['예방지도']=x.preventionDone?'이수':(x.isMidal?'미이수':'');row['최종']=x.isTarget?'대상자':'';row['사유']=(x.reasons||[]).join(', ');return row});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),s.name.substring(0,31));has=true;
     r.students.filter(x=>x.isTarget).forEach(x=>{tgts.push({'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'사유':(x.reasons||[]).join(', ')})})});
