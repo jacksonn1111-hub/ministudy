@@ -107,23 +107,22 @@ function loadCfg(id){const s=getCfg(id);if(s)CFG=JSON.parse(JSON.stringify(s));e
 function parseNEISGrade(buf){
   const wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rng=XLSX.utils.decode_range(ws['!ref']||'A1');
   const raw=[];for(let r=rng.s.r;r<=rng.e.r;r++){const row=[];for(let c=rng.s.c;c<=rng.e.c;c++){const a=XLSX.utils.encode_cell({r,c}),cell=ws[a];row.push(cell?cell.v:null)}raw.push(row)}
-  const meta={};
-  for(let i=0;i<Math.min(raw.length,8);i++){const rs=raw[i].filter(Boolean).join(' ');
-    const ym=rs.match(/(\d+)학년도\s*제?(\d)학기/);if(ym){meta.year=ym[1];meta.semester=ym[2]}
-    const sm=rs.match(/^(.+?)\(\d+\)과목/);if(sm)meta.subject=sm[1];
-    const gm=rs.match(/(\d)학년\s+(\S+)/);if(gm&&!meta.grade){meta.grade=gm[1];meta.dept=gm[2]}}
-  let hdrIdx=-1;const assessments=[];
-  for(let i=0;i<Math.min(raw.length,10);i++){const row=raw[i];let found=false;
-    for(let c=0;c<row.length;c++){const v=String(row[c]||''),m=v.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
-      if(m){const nm=m[1].replace(/\n/g,' ').trim();if(!/정기시험|수행평가\(|평가방법/.test(nm)){assessments.push({name:nm,ratio:parseFloat(m[2]),colIdx:c});found=true}}}
-    if(found){hdrIdx=i;break}}
+  const meta={};let assessments=[];const sections=[];
+  for(let i=0;i<raw.length;i++){const row=raw[i];const rowStr=row.filter(Boolean).map(String).join(' ');
+    const ym=rowStr.match(/(\d+)학년도\s*제?(\d)학기/);if(ym&&!meta.year){meta.year=ym[1];meta.semester=ym[2]}
+    const sm=rowStr.match(/^(.+?)\(\d+\)과목/);if(sm&&!meta.subject)meta.subject=sm[1];
+    const secM=rowStr.match(/(\d)학년\s+(\S+?)\s+(\d+)강의실/);
+    if(secM){sections.push({startRow:i,grade:secM[1],dept:secM[2],room:secM[3]});if(!meta.grade){meta.grade=secM[1];meta.dept=secM[2]}}
+    if(assessments.length===0){for(let c=0;c<row.length;c++){const v=String(row[c]||''),m=v.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
+      if(m){const nm=m[1].replace(/\n/g,' ').trim();if(!/정기시험|수행평가\(|평가방법/.test(nm))assessments.push({name:nm,ratio:parseFloat(m[2]),colIdx:c})}}}}
+  function getDept(ri){let d='';for(const s of sections)if(ri>=s.startRow)d=s.dept;return d}
   const students=[];
-  for(let i=hdrIdx+1;i<raw.length;i++){const row=raw[i];if(!row)continue;let cls=null,num=null,name=null;
+  for(let i=0;i<raw.length;i++){const row=raw[i];if(!row)continue;let cls=null,num=null,name=null;
     for(let c=0;c<row.length;c++){const v=String(row[c]||'').trim(),bn=v.match(/^(\d+)\s*\/\s*(\d+)$/);
       if(bn){cls=bn[1];num=bn[2];for(let nc=c+1;nc<Math.min(c+4,row.length);nc++){const nv=String(row[nc]||'').trim();if(nv&&!/^\d/.test(nv)&&nv.length>=2){name=nv;break}}break}}
     if(!cls||!name)continue;const scores=[];assessments.forEach(a=>{scores.push(parseFloat(row[a.colIdx])||0)});
-    students.push({class:cls,num,name,scores})}
-  return{students,assessments,meta}}
+    students.push({class:cls,num,name,scores,dept:getDept(i)})}
+  return{students,assessments,meta,sections}}
 
 function parseNEISAttend(buf){
   const wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{defval:''});
@@ -183,7 +182,9 @@ function uploadPage(subj){
       h+=`</div>`;
       // Show auto-detected assessments from first file
       const as=gradeFiles[0].assessments;
-      if(as.length)h+=`<div class="auto-msg">✅ 평가영역 자동감지: ${as.map(a=>`${a.name}(${a.ratio}%)`).join(', ')}</div>`;
+      if(as.length){
+        const depts=[...new Set(gradeFiles.flatMap(f=>f.students.map(s=>s.dept)).filter(Boolean))];
+        h+=`<div class="auto-msg">✅ 평가영역: ${as.map(a=>`${a.name}(${a.ratio}%)`).join(', ')}${depts.length?` | 학과: ${depts.join(', ')}`:''}</div>`;}
       // Config
       h+=cfgSection();
     }
@@ -216,14 +217,27 @@ function uploadPage(subj){
   return h}
 
 function cfgSection(){
+  // Collect dept list from uploaded grade files
+  const fileDepts=[...new Set(gradeFiles.flatMap(f=>f.students.map(s=>s.dept)).filter(Boolean))];
+  if(!CFG.deptThresholds)CFG.deptThresholds={};
+  
   let h=`<div style="margin:12px 0;padding:12px 16px;background:#f8fafc;border-radius:8px">
     <p style="font-size:13px;font-weight:700;margin-bottom:8px">성적 설정</p>
     <div class="form-grid" style="margin-bottom:10px">
-      <div class="form-group"><label>분할점수 유형</label><select onchange="CFG.divisionType=this.value">
+      <div class="form-group"><label>분할점수 유형</label><select onchange="CFG.divisionType=this.value;render()">
         <option value="fixed" ${CFG.divisionType==='fixed'?'selected':''}>고정분할점수</option>
         <option value="estimated" ${CFG.divisionType==='estimated'?'selected':''}>추정분할점수</option></select></div>
-      <div class="form-group"><label>성취도 기준점수 (환산 100점 만점)</label><input type="number" value="${CFG.threshold}" min="0" max="100" onchange="CFG.threshold=Number(this.value)"></div>
+      ${CFG.divisionType==='fixed'?
+        `<div class="form-group"><label>성취도 기준점수 (환산 100점 만점)</label><input type="number" value="${CFG.threshold}" min="0" max="100" onchange="CFG.threshold=Number(this.value)"></div>`
+        :''}
     </div>
+    ${CFG.divisionType==='estimated'&&fileDepts.length>0?`
+      <p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">추정분할 — 학과별 기준점수</p>
+      ${fileDepts.map(d=>{const v=CFG.deptThresholds[d]??CFG.threshold??40;
+        return`<div class="perf-row"><span style="min-width:120px;font-size:12px">${esc(d)}</span>
+        <input type="number" value="${v}" min="0" max="100" style="width:70px;font-size:12px;padding:4px 6px" onchange="CFG.deptThresholds['${d}']=Number(this.value)">
+        <span style="font-size:11px;color:var(--text3)">점</span></div>`}).join('')}
+    `:(CFG.divisionType==='estimated'?`<p style="font-size:12px;color:var(--amber);margin-bottom:6px">⚠ 성적 파일을 먼저 업로드하면 학과별 기준점수를 입력할 수 있습니다</p>`:'')}
     <p style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text2)">평가영역 만점 확인 (반영비율은 파일에서 자동설정)</p>`;
   if(CFG.exam1.enabled)h+=`<div class="perf-row"><span style="min-width:70px;font-size:12px">1차고사</span><span class="badge badge-blue">${CFG.exam1.ratio}%</span><span style="font-size:11px;color:var(--text3)">만점:</span><input type="number" value="${CFG.exam1.max}" min="1" style="width:60px;font-size:12px;padding:4px 6px" onchange="CFG.exam1.max=Number(this.value)"></div>`;
   if(CFG.exam2.enabled)h+=`<div class="perf-row"><span style="min-width:70px;font-size:12px">2차고사</span><span class="badge badge-blue">${CFG.exam2.ratio}%</span><span style="font-size:11px;color:var(--text3)">만점:</span><input type="number" value="${CFG.exam2.max}" min="1" style="width:60px;font-size:12px;padding:4px 6px" onchange="CFG.exam2.max=Number(this.value)"></div>`;
@@ -283,7 +297,10 @@ async function runCalc(){
         if(CFG.exam1.enabled&&ci<s.scores.length){scores.exam1=s.scores[ci];cv+=(s.scores[ci]/CFG.exam1.max)*CFG.exam1.ratio;ci++}
         if(CFG.exam2.enabled&&ci<s.scores.length){scores.exam2=s.scores[ci];cv+=(s.scores[ci]/CFG.exam2.max)*CFG.exam2.ratio;ci++}
         CFG.perfs.forEach(pf=>{if(ci<s.scores.length){scores.perfs.push(s.scores[ci]);cv+=(s.scores[ci]/pf.max)*pf.ratio;ci++}})}
-      cv=Math.round(cv*100)/100;sm[k]={class:s.class,num:s.num,name:s.name,scores,converted:cv,gradeTarget:cv<CFG.threshold}})});
+      cv=Math.round(cv*100)/100;
+      const thr=CFG.divisionType==='estimated'&&s.dept&&CFG.deptThresholds?
+        (CFG.deptThresholds[s.dept]??CFG.threshold??40):(CFG.threshold??40);
+      sm[k]={class:s.class,num:s.num,name:s.name,scores,converted:cv,gradeTarget:cv<thr,dept:s.dept,threshold:thr}})});
   }
 
   // Merge all attend files
@@ -314,6 +331,7 @@ async function runCalc(){
 function readCfgDOM(){
   document.querySelectorAll('[onchange*="CFG.threshold"]').forEach(el=>{CFG.threshold=Number(el.value)||40});
   document.querySelectorAll('[onchange*="CFG.divisionType"]').forEach(el=>{CFG.divisionType=el.value});
+  // deptThresholds are updated via onchange already
   document.querySelectorAll('[onchange*="CFG.exam1.max"]').forEach(el=>{CFG.exam1.max=Number(el.value)||100});
   document.querySelectorAll('[onchange*="CFG.exam2.max"]').forEach(el=>{CFG.exam2.max=Number(el.value)||100});
   CFG.perfs.forEach((p,i)=>{document.querySelectorAll(`[onchange*="CFG.perfs[${i}].max"]`).forEach(el=>{p.max=Number(el.value)||100})})}
