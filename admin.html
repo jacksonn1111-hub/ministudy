@@ -17,7 +17,7 @@ button{cursor:pointer;font:inherit}input,select{font:inherit}
 .nav button{padding:12px 20px;font-size:13px;font-weight:600;color:var(--text2);background:none;border:none;border-bottom:2.5px solid transparent;transition:.15s}
 .nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
 .nav button:hover:not(.active){color:var(--text);background:#f8fafc}
-.container{max-width:1000px;margin:0 auto;padding:24px}
+.container{max-width:1100px;margin:0 auto;padding:24px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:12px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
 .card-title{font-size:15px;font-weight:700}
@@ -37,6 +37,9 @@ button{cursor:pointer;font:inherit}input,select{font:inherit}
 .form-group label{font-size:12px;font-weight:600;color:var(--text2)}
 .form-group input,.form-group select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
 .form-group input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.chk-group{display:flex;gap:10px;flex-wrap:wrap;padding:4px 0}
+.chk-group label{display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+.chk-group input{width:15px;height:15px;accent-color:var(--blue)}
 .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{background:#f8fafc;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -61,9 +64,11 @@ tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{backgrou
 .setup-page h2{font-size:20px;font-weight:800;margin-bottom:8px}
 .setup-page p{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8}
 .setup-page .url-input{width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:12px}
-.setup-page .url-input:focus{outline:none;border-color:var(--blue)}
 .conn{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:6px}
 .conn-ok{background:var(--green-l);color:var(--green)}.conn-fail{background:var(--red-l);color:var(--red)}
+.tab-toggle{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:13px}
+.tab-toggle button{padding:6px 14px;border:none;background:var(--surface);color:var(--text2);font-weight:600;transition:.15s}
+.tab-toggle button.active{background:var(--blue);color:#fff}
 @media(max-width:768px){.container{padding:16px}.form-row{flex-direction:column}}
 </style>
 </head>
@@ -71,8 +76,13 @@ tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{backgrou
 <div id="root"></div>
 <div class="toast" id="toast"></div>
 <script>
+const DEPTS={
+  '1':['글로벌외식조리과','미디어콘텐츠과'],
+  '2':['외식조리과','디지털영상과','e-비즈니스과']
+};
 let API=localStorage.getItem('mast_api')||'https://script.google.com/macros/s/AKfycbwpzHsmHgM6Fcp_SvkduhwalTo_zSOEj1SwyGI9Ph0HV1Z_Iksyy_x_dvaIlQm3OhMYKA/exec';
-let page='subjects',D={},loading=false,connected=false,dashFilter='';
+let page='subjects',D={},loading=false,connected=false,dashFilter='',dashView='subject',dashGradeFilter='';
+
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 async function apiGet(){if(!API)return{};const r=await fetch(API+'?action=getAll');return r.json()}
@@ -82,6 +92,7 @@ async function loadData(){loading=true;render();try{D=await apiGet();connected=t
 function subjs(){return D.subjects||[]}
 function cfg(id){return D['config_'+id]||null}
 function res(id){return D['results_'+id]||null}
+function deptStr(s){const d=s.dept||s.depts;return Array.isArray(d)?d.join(', '):(d||'')}
 
 function render(){
   const root=document.getElementById('root');
@@ -92,29 +103,35 @@ function render(){
   <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙ 연결</button></div></div>`;
   h+=`<div class="nav">${[{id:'subjects',l:'과목 관리'},{id:'dashboard',l:'대상자 현황'}].map(p=>`<button class="${page===p.id?'active':''}" onclick="page='${p.id}';render()">${p.l}${p.id==='subjects'&&subjs().length?`<span class="badge badge-blue" style="margin-left:6px">${subjs().length}</span>`:''}</button>`).join('')}</div>`;
   h+=`<div class="container">${loading?'<div class="loading">불러오는 중</div>':(page==='subjects'?subjPage():dashPage())}</div>`;
-  root.innerHTML=h;
-}
+  root.innerHTML=h}
 
+/* ═══ 과목 관리 ═══ */
 function subjPage(){
   const ss=subjs();
   let h=`<div class="card"><div class="card-header"><span class="card-title">과목 등록</span></div>
-  <div class="form-row">
+  <div class="form-row" style="margin-bottom:10px">
     <div class="form-group" style="flex:1"><label>과목명 *</label><input id="iN" placeholder="예: 국어" onkeydown="if(event.key==='Enter')addS()"></div>
-    <div class="form-group" style="flex:1"><label>담당 선생님</label><input id="iT" placeholder="예: 홍길동" onkeydown="if(event.key==='Enter')addS()"></div>
-    <div class="form-group" style="min-width:130px"><label>평가유형</label><select id="iE">
-      <option value="both">성적 + 출결</option><option value="attendanceOnly">출결만</option></select></div>
-    <button class="btn btn-primary" onclick="addS()" style="margin-top:auto">+ 추가</button>
-  </div></div>`;
+    <div class="form-group" style="flex:1"><label>담당 선생님</label><input id="iT" placeholder="예: 홍길동"></div>
+    <div class="form-group" style="min-width:80px"><label>학년</label><select id="iG" onchange="updDeptChk()">
+      <option value="1">1학년</option><option value="2">2학년</option></select></div>
+    <div class="form-group" style="min-width:120px"><label>평가유형</label><select id="iE">
+      <option value="both">성적+출결</option><option value="attendanceOnly">출결만</option></select></div>
+  </div>
+  <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--text2)">학과 (복수선택 가능)</label>
+    <div class="chk-group" id="deptChks"></div></div>
+  <button class="btn btn-primary" onclick="addS()">+ 추가</button>
+  </div>`;
 
   h+=`<div class="card"><div class="card-header"><span class="card-title">등록 과목 (${ss.length})</span></div>`;
   if(!ss.length)h+=`<div class="empty">등록된 과목이 없습니다</div>`;
   else ss.forEach((s,i)=>{
     const c=cfg(s.id),r=res(s.id),hasR=r?.students?.length>0,tN=hasR?r.students.filter(x=>x.isTarget).length:0;
-    const evLabel=s.evalType==='attendanceOnly'?'출결만':'성적+출결';
+    const evL=(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결';
     h+=`<div class="subj-item"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
       <span style="color:var(--text3);font-size:12px;min-width:20px">${i+1}</span>
       <strong>${esc(s.name)}</strong><span style="font-size:12px;color:var(--text2)">${esc(s.teacher||'미지정')}</span>
-      <span class="badge ${s.evalType==='attendanceOnly'?'badge-green':'badge-blue'}">${evLabel}</span>
+      <span class="badge badge-slate">${s.grade||'?'}학년 ${esc(deptStr(s))}</span>
+      <span class="badge ${(s.evalType||'both')==='attendanceOnly'?'badge-green':'badge-blue'}">${evL}</span>
       ${c?'<span class="badge badge-green">설정완료</span>':''}
       ${hasR?`<span class="badge badge-amber">${r.students.length}명</span>`:''}
       ${tN>0?`<span class="badge badge-red">대상자 ${tN}</span>`:''}
@@ -123,78 +140,158 @@ function subjPage(){
       <button class="btn btn-danger btn-sm" onclick="delS('${s.id}')">삭제</button>
     </div></div>`;
   });
-  h+=`</div>`;return h;
-}
+  h+=`</div>`;
+  // Init dept checkboxes after render
+  setTimeout(()=>updDeptChk(),0);
+  return h}
 
+function updDeptChk(){
+  const g=document.getElementById('iG');if(!g)return;
+  const el=document.getElementById('deptChks');if(!el)return;
+  const depts=DEPTS[g.value]||[];
+  el.innerHTML=depts.map(d=>`<label><input type="checkbox" value="${d}" checked> ${d}</label>`).join('')}
+
+function getSelectedDepts(){
+  const chks=document.querySelectorAll('#deptChks input[type=checkbox]:checked');
+  return Array.from(chks).map(c=>c.value)}
+
+async function addS(){
+  const nm=document.getElementById('iN').value.trim(),tc=document.getElementById('iT').value.trim();
+  const ev=document.getElementById('iE').value,gr=document.getElementById('iG').value;
+  const depts=getSelectedDepts();
+  if(!nm)return toast('과목명 입력');if(!depts.length)return toast('학과를 선택하세요');
+  const ss=subjs();
+  ss.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:nm,teacher:tc,evalType:ev,grade:gr,depts});
+  D.subjects=ss;document.getElementById('iN').value='';document.getElementById('iT').value='';
+  render();await apiSave('subjects',ss);toast(`"${nm}" 추가`)}
+
+async function editS(id){
+  const ss=subjs(),s=ss.find(x=>x.id===id);if(!s)return;
+  const nm=prompt('과목명:',s.name);if(nm===null)return;
+  const tc=prompt('담당 선생님:',s.teacher||'');if(tc===null)return;
+  const gr=prompt('학년 (1 또는 2):',s.grade||'1');if(gr===null)return;
+  const allD=DEPTS[gr]||[];const curD=s.depts||[s.dept].filter(Boolean);
+  const dStr=allD.map((d,i)=>`${i+1}:${d}${curD.includes(d)?'✓':''}`).join(' ');
+  const dp=prompt(`학과 번호 (쉼표구분, ${dStr}):`,curD.map(d=>allD.indexOf(d)+1).filter(x=>x>0).join(','));
+  if(dp===null)return;
+  const newDepts=dp.split(',').map(x=>allD[parseInt(x.trim())-1]).filter(Boolean);
+  const evPick=prompt('평가유형 (1:성적+출결, 2:출결만):',(['both','attendanceOnly'].indexOf(s.evalType||'both'))+1);
+  if(evPick===null)return;
+  s.name=nm.trim()||s.name;s.teacher=tc.trim();s.grade=gr.trim();
+  if(newDepts.length)s.depts=newDepts;
+  const ei=parseInt(evPick)-1;if(ei>=0&&ei<2)s.evalType=['both','attendanceOnly'][ei];
+  D.subjects=ss;render();await apiSave('subjects',ss);toast('수정 완료')}
+
+async function delS(id){if(!confirm('삭제하시겠습니까?'))return;D.subjects=subjs().filter(s=>s.id!==id);delete D['config_'+id];delete D['results_'+id];
+  render();await apiSave('subjects',D.subjects);await apiDel('config_'+id);await apiDel('results_'+id);toast('삭제 완료')}
+
+/* ═══ 대상자 현황 ═══ */
 function dashPage(){
-  const ss=subjs(),allT=[],st=[];
-  ss.forEach(s=>{const c=cfg(s.id),r=res(s.id),stu=r?.students||[],tot=stu.length,mid=stu.filter(x=>x.isMidal).length,tgt=stu.filter(x=>x.isTarget).length;
+  const ss=subjs();
+  const allT=[],st=[];
+  ss.forEach(s=>{const c=cfg(s.id),r=res(s.id),stu=(r?.students||[]).filter(x=>x.status!=='자퇴'),tot=stu.length,mid=stu.filter(x=>x.isMidal).length,tgt=stu.filter(x=>x.isTarget).length;
     st.push({s,c,tot,mid,tgt,up:tot>0});
-    stu.filter(x=>x.isTarget).forEach(x=>{allT.push({...x,sn:s.name,tc:s.teacher})});
-  });
+    stu.filter(x=>x.isTarget).forEach(x=>{allT.push({...x,subjectId:s.id,sn:s.name,tc:s.teacher,grade:s.grade,depts:deptStr(s)})})});
   const tT=allT.length,tM=st.reduce((a,b)=>a+b.mid,0),uN=st.filter(x=>x.up).length;
+
+  // Build student map for student view
+  const studentMap={};
+  ss.forEach(s=>{const r=res(s.id);if(!r?.students)return;
+    r.students.filter(x=>x.status!=='자퇴').forEach(x=>{
+      const k=`${s.grade||''}_${x.class}_${x.num}_${x.name}`;
+      if(!studentMap[k])studentMap[k]={grade:s.grade,class:x.class,num:x.num,name:x.name,subjects:[]};
+      if(x.isTarget)studentMap[k].subjects.push({name:s.name,reasons:x.reasons||[]});
+    })});
+  const targetStudents=Object.values(studentMap).filter(s=>s.subjects.length>0);
+  targetStudents.sort((a,b)=>{if(a.grade!==b.grade)return(a.grade||'').localeCompare(b.grade||'');if(a.class!==b.class)return a.class.localeCompare(b.class,'ko');return parseInt(a.num)-parseInt(b.num)});
+  const uniqueTargetCount=targetStudents.length;
+
   let h=`<div class="stats">
     <div class="stat-card"><div class="num">${ss.length}</div><div class="lb">전체 과목</div></div>
     <div class="stat-card"><div class="num" style="color:var(--green)">${uN}</div><div class="lb">결과 등록</div></div>
     <div class="stat-card"><div class="num" style="color:var(--amber)">${tM}</div><div class="lb">미달 합계</div></div>
-    <div class="stat-card hl"><div class="num">${tT}</div><div class="lb">최종 대상자</div></div>
+    <div class="stat-card hl"><div class="num">${uniqueTargetCount}</div><div class="lb">대상 학생 (중복제거)</div></div>
   </div>`;
+
+  // Subject table
   h+=`<div class="card"><div class="card-header"><span class="card-title">과목별 현황</span>
     <button class="btn btn-success btn-sm" onclick="expAll()">📥 전과목 엑셀</button></div>
-    <div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th class="tc">유형</th><th class="tc">상태</th><th class="tr">학생</th><th class="tr">미달</th><th class="tr">대상자</th></tr></thead><tbody>`;
+    <div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th class="tc">학년/학과</th><th class="tc">유형</th><th class="tc">상태</th><th class="tr">학생</th><th class="tr">미달</th><th class="tr">대상자</th></tr></thead><tbody>`;
   st.forEach(({s,c,tot,mid,tgt,up})=>{
-    const evL=s.evalType==='attendanceOnly'?'출결만':'성적+출결';
+    const evL=(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결';
     h+=`<tr><td style="font-weight:600">${esc(s.name)}</td><td>${esc(s.teacher||'—')}</td>
-    <td class="tc"><span class="badge ${s.evalType==='attendanceOnly'?'badge-green':'badge-blue'}">${evL}</span></td>
+    <td class="tc" style="font-size:11px">${s.grade||''}학년<br>${esc(deptStr(s))}</td>
+    <td class="tc"><span class="badge ${(s.evalType||'both')==='attendanceOnly'?'badge-green':'badge-blue'}">${evL}</span></td>
     <td class="tc">${up?'<span class="badge badge-green">완료</span>':'<span class="badge badge-slate">대기</span>'}</td>
     <td class="tr">${up?tot:'—'}</td><td class="tr">${up?mid:'—'}</td>
     <td class="tr" style="font-weight:700;${tgt>0?'color:var(--red)':''}">${up?tgt:'—'}</td></tr>`;
   });
   h+=`</tbody></table></div></div>`;
-  h+=`<div class="card"><div class="card-header"><span class="card-title">최종 대상자 (${tT}명)</span>
-    <div class="form-group" style="min-width:130px"><select onchange="dashFilter=this.value;render()"><option value="">전체</option>${ss.map(s=>`<option value="${s.name}" ${dashFilter===s.name?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div></div>`;
-  const fl=dashFilter?allT.filter(t=>t.sn===dashFilter):allT;
-  if(!fl.length)h+=`<div class="empty">${tT?'해당 과목에 대상자 없음':'대상자 없음'}</div>`;
-  else{h+=`<div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th>반</th><th>번호</th><th>성명</th><th class="tc">사유</th></tr></thead><tbody>`;
-    fl.forEach(t=>{h+=`<tr class="row-target"><td>${esc(t.sn)}</td><td>${esc(t.tc||'—')}</td><td>${esc(t.class)}</td><td>${t.num}</td><td style="font-weight:600">${esc(t.name)}</td><td class="tc">${(t.reasons||[]).map(r=>`<span class="badge badge-red">${r}</span>`).join(' ')}</td></tr>`});
-    h+=`</tbody></table></div>`}
-  h+=`</div>`;return h;
-}
 
-async function addS(){const n=document.getElementById('iN'),t=document.getElementById('iT'),e=document.getElementById('iE');
-  const nm=n.value.trim(),tc=t.value.trim(),ev=e.value;
-  if(!nm)return toast('과목명 입력');const ss=subjs();
-  ss.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:nm,teacher:tc,evalType:ev});
-  D.subjects=ss;n.value='';t.value='';render();await apiSave('subjects',ss);toast(`"${nm}" 추가`)}
+  // Target list with view toggle
+  h+=`<div class="card"><div class="card-header"><span class="card-title">대상자 명단</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="tab-toggle">
+        <button class="${dashView==='subject'?'active':''}" onclick="dashView='subject';render()">과목별</button>
+        <button class="${dashView==='student'?'active':''}" onclick="dashView='student';render()">학생별</button>
+      </div>
+      <div class="form-group" style="min-width:80px"><select onchange="dashGradeFilter=this.value;render()" style="padding:5px 8px;font-size:12px">
+        <option value="">전체학년</option><option value="1" ${dashGradeFilter==='1'?'selected':''}>1학년</option><option value="2" ${dashGradeFilter==='2'?'selected':''}>2학년</option>
+      </select></div>
+    </div></div>`;
 
-async function editS(id){const ss=subjs(),s=ss.find(x=>x.id===id);if(!s)return;
-  const nm=prompt('과목명:',s.name);if(nm===null)return;
-  const tc=prompt('담당 선생님:',s.teacher||'');if(tc===null)return;
-  const evOpts=['성적+출결','출결만'];const evVals=['both','attendanceOnly'];
-  const curIdx=evVals.indexOf(s.evalType||'both');
-  const evPick=prompt(`평가유형 (1:성적+출결, 2:출결만):`,curIdx+1);
-  if(evPick===null)return;
-  const evIdx=parseInt(evPick)-1;
-  s.name=nm.trim()||s.name;s.teacher=tc.trim();
-  if(evIdx>=0&&evIdx<2)s.evalType=evVals[evIdx];
-  D.subjects=ss;render();await apiSave('subjects',ss);toast('수정 완료')}
+  if(dashView==='subject'){
+    // Subject-based view
+    h+=`<div style="margin-bottom:10px"><div class="form-group" style="min-width:130px;display:inline-flex"><select onchange="dashFilter=this.value;render()" style="padding:5px 8px;font-size:12px">
+      <option value="">전체 과목</option>${ss.map(s=>`<option value="${s.name}" ${dashFilter===s.name?'selected':''}>${esc(s.name)}</option>`).join('')}
+    </select></div></div>`;
+    let fl=dashFilter?allT.filter(t=>t.sn===dashFilter):allT;
+    if(dashGradeFilter)fl=fl.filter(t=>(t.grade||'')=== dashGradeFilter);
+    if(!fl.length)h+=`<div class="empty">대상자 없음</div>`;
+    else{h+=`<div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th>학년</th><th>반</th><th>번호</th><th>성명</th><th class="tc">사유</th></tr></thead><tbody>`;
+      fl.forEach(t=>{h+=`<tr class="row-target"><td>${esc(t.sn)}</td><td>${esc(t.tc||'—')}</td><td class="tc">${t.grade||''}학년</td><td>${esc(t.class)}</td><td>${t.num}</td><td style="font-weight:600">${esc(t.name)}</td><td class="tc">${(t.reasons||[]).map(r=>`<span class="badge badge-red">${r}</span>`).join(' ')}</td></tr>`});
+      h+=`</tbody></table></div>`}
+  } else {
+    // Student-based view
+    let fl=targetStudents;
+    if(dashGradeFilter)fl=fl.filter(s=>(s.grade||'')===dashGradeFilter);
+    if(!fl.length)h+=`<div class="empty">대상자 없음</div>`;
+    else{
+      h+=`<p style="font-size:12px;color:var(--text2);margin-bottom:8px">총 ${fl.length}명의 학생이 1개 이상 과목에서 대상자입니다.</p>`;
+      h+=`<div class="table-wrap"><table><thead><tr><th>학년</th><th>반</th><th>번호</th><th>성명</th><th>대상 과목수</th><th>미달 과목 및 사유</th></tr></thead><tbody>`;
+      fl.forEach(s=>{
+        const subjList=s.subjects.map(sub=>`<span class="badge badge-red" style="margin:1px">${sub.name}(${sub.reasons.join('·')})</span>`).join(' ');
+        h+=`<tr class="row-target"><td class="tc">${s.grade||''}학년</td><td>${esc(s.class)}</td><td>${s.num}</td><td style="font-weight:600">${esc(s.name)}</td>
+        <td class="tc" style="font-weight:700;color:var(--red)">${s.subjects.length}</td>
+        <td>${subjList}</td></tr>`;
+      });
+      h+=`</tbody></table></div>`}
+  }
+  h+=`</div>`;return h}
 
-async function delS(id){if(!confirm('삭제하시겠습니까?'))return;D.subjects=subjs().filter(s=>s.id!==id);delete D['config_'+id];delete D['results_'+id];
-  render();await apiSave('subjects',D.subjects);await apiDel('config_'+id);await apiDel('results_'+id);toast('삭제 완료')}
 function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
 function chgApi(){const u=prompt('Apps Script URL:',API);if(u===null)return;API=u.trim();localStorage.setItem('mast_api',API);if(API)loadData();else render()}
 
 function expAll(){
   const wb=XLSX.utils.book_new();let has=false;const tgts=[];
   subjs().forEach(s=>{const c=cfg(s.id),r=res(s.id);if(!r?.students?.length)return;const ib=(s.evalType||'both')!=='attendanceOnly';
-    const rows=r.students.map(x=>{const row={'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'상태':x.status||'재학'};
+    const rows=r.students.filter(x=>x.status!=='자퇴').map(x=>{const row={'학년':s.grade,'학과':deptStr(s),'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'상태':x.status||'재학'};
       if(ib){row['환산']=x.converted;row['기준']=c?.threshold;row['성적']=x.gradeTarget?'미달':'도달'}
       row['출석']=x.attend??'';row['출석기준']=x.threshold23;row['출결']=x.attendTarget?'미달':(x.attend!=null?'충족':'');
-      row['예방지도']=x.preventionDone?'이수':(x.isMidal?'미이수':'');row['최종']=x.isTarget?'대상자':'';row['사유']=(x.reasons||[]).join(', ');return row});
+      row['예방지도']=x.preventionDone?'이수':(x.status==='위탁'?'위탁':(x.isMidal?'미이수':''));
+      row['최종']=x.isTarget?'대상자':'';row['사유']=(x.reasons||[]).join(', ');return row});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),s.name.substring(0,31));has=true;
-    r.students.filter(x=>x.isTarget).forEach(x=>{tgts.push({'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'사유':(x.reasons||[]).join(', ')})})});
-  if(tgts.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(tgts),'최종 대상자');
-  if(!has&&!tgts.length)return toast('데이터 없음');XLSX.writeFile(wb,'최성보_전과목.xlsx')}
+    r.students.filter(x=>x.isTarget).forEach(x=>{tgts.push({'학년':s.grade,'학과':deptStr(s),'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'사유':(x.reasons||[]).join(', ')})})});
+  // Student-based sheet
+  const sMap={};subjs().forEach(s=>{const r=res(s.id);if(!r?.students)return;
+    r.students.filter(x=>x.status!=='자퇴'&&x.isTarget).forEach(x=>{const k=`${s.grade}_${x.class}_${x.num}`;
+      if(!sMap[k])sMap[k]={'학년':s.grade,'반':x.class,'번호':x.num,'성명':x.name,'대상과목수':0,'대상과목':''};
+      sMap[k]['대상과목수']++;sMap[k]['대상과목']+=(sMap[k]['대상과목']?', ':'')+s.name+'('+(x.reasons||[]).join('·')+')'})});
+  const stuRows=Object.values(sMap).sort((a,b)=>a['학년']!==b['학년']?(a['학년']||'').localeCompare(b['학년']||''):a['반']!==b['반']?a['반'].localeCompare(b['반'],'ko'):parseInt(a['번호'])-parseInt(b['번호']));
+  if(stuRows.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(stuRows),'학생별 대상자');
+  if(tgts.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(tgts),'과목별 대상자');
+  if(!has&&!tgts.length&&!stuRows.length)return toast('데이터 없음');
+  XLSX.writeFile(wb,'최성보_전과목.xlsx')}
 
 if(API)loadData();else render();
 </script>
