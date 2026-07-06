@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>최성보 교사용</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--text2:#64748b;--text3:#94a3b8;--blue:#2563eb;--blue-l:#dbeafe;--green:#059669;--green-l:#d1fae5;--amber:#d97706;--amber-l:#fef3c7;--red:#dc2626;--red-l:#fee2e2;--rose-bg:#fff1f2;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+button{cursor:pointer;font:inherit}input,select{font:inherit}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
+.header h1 .icon{width:34px;height:34px;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:12px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.card-title{font-size:15px;font-weight:700}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-blue{background:var(--blue-l);color:var(--blue)}.badge-green{background:var(--green-l);color:var(--green)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}.badge-red{background:var(--red-l);color:var(--red)}
+.badge-slate{background:#f1f5f9;color:var(--text2)}.badge-target{background:var(--red);color:#fff;font-weight:700}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#047857}
+.btn-danger{background:var(--red-l);color:var(--red)}.btn-danger:hover{background:#fecaca}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:#f8fafc}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-group{display:flex;gap:6px;flex-wrap:wrap}
+.btn-big{padding:14px 36px;font-size:15px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;font-weight:600;color:var(--text2)}
+.form-group input,.form-group select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.check-row{display:flex;align-items:center;gap:8px}
+.check-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}
+.perf-row{display:flex;align-items:center;gap:8px;padding:5px 0;flex-wrap:wrap}
+.perf-row input{max-width:120px}
+select.isel{padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fff}
+.file-upload{border:2px dashed var(--border);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.15s;position:relative}
+.file-upload:hover{border-color:var(--blue);background:var(--blue-l)}
+.file-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#f8fafc;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
+thead th.tc{text-align:center}thead th.tr{text-align:right}
+tbody td{padding:8px 12px;border-bottom:1px solid #f1f5f9}
+tbody td.tc{text-align:center}tbody td.tr{text-align:right}
+tbody tr:hover{background:#fafbfc}
+tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{background:#ffe4e6}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.stat-card .num{font-size:26px;font-weight:800}.stat-card .lb{font-size:11px;color:var(--text2);margin-top:2px}
+.stat-card.hl{border-color:#fca5a5;background:var(--rose-bg)}.stat-card.hl .num{color:var(--red)}
+.filter-bar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.empty{text-align:center;padding:40px;color:var(--text2)}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:1000;opacity:0;transform:translateY(20px);transition:.3s;max-width:360px}
+.toast.show{opacity:1;transform:translateY(0)}
+.loading{text-align:center;padding:32px;color:var(--text2);font-size:13px}
+.loading::after{content:'';display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;margin-left:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.setup-page{max-width:520px;margin:60px auto;padding:24px}
+.setup-page h2{font-size:20px;font-weight:800;margin-bottom:8px}
+.setup-page p{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8}
+.setup-page .url-input{width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:12px}
+.setup-page .url-input:focus{outline:none;border-color:var(--green)}
+.conn{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:6px}
+.conn-ok{background:var(--green-l);color:var(--green)}.conn-fail{background:var(--red-l);color:var(--red)}
+.step{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+.step-n{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.step-done{background:var(--green-l);color:var(--green)}.step-act{background:var(--blue);color:#fff}.step-wait{background:#f1f5f9;color:var(--text3)}
+.step-line{flex:1;height:2px;background:var(--border)}
+hr.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
+.auto-msg{background:var(--green-l);border:1px solid #a7f3d0;border-radius:8px;padding:10px 16px;font-size:12px;color:#065f46;margin:12px 0;display:flex;align-items:center;gap:8px}
+.preview-tbl{font-size:12px;margin-top:8px}
+.preview-tbl td,.preview-tbl th{padding:4px 8px;border:1px solid var(--border)}
+.preview-tbl th{background:#f8fafc}
+@media(max-width:768px){.container{padding:16px}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast" id="toast"></div>
+<script>
+let API=localStorage.getItem('mast_api')||'https://script.google.com/macros/s/AKfycbwpzHsmHgM6Fcp_SvkduhwalTo_zSOEj1SwyGI9Ph0HV1Z_Iksyy_x_dvaIlQm3OhMYKA/exec';
+let D={},loading=false,connected=false;
+let selId='',clsFilt='',onlyMidal=false;
+
+// Parsed file data
+let gradeData=null;  // {students:[], assessments:[], meta:{}}
+let attendData=null; // {students:[]}
+
+let CFG={evalType:'both',divisionType:'fixed',threshold:40,exam1:{enabled:true,ratio:30,max:100},exam2:{enabled:true,ratio:30,max:100},perfs:[{id:'p1',name:'수행평가',ratio:40,max:100}],totalHours:68};
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+async function apiGet(){if(!API)return{};const r=await fetch(API+'?action=getAll');return r.json()}
+async function apiSave(k,v){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'save',key:k,value:v}),redirect:'follow'}).catch(()=>{})}
+async function loadData(){loading=true;render();try{D=await apiGet();connected=true}catch{connected=false;toast('연결 실패')}loading=false;render()}
+function subjs(){return D.subjects||[]}
+function getCfg(id){return D['config_'+id]||null}
+function getRes(id){return D['results_'+id]||null}
+
+function loadCfg(id){
+  const s=getCfg(id);
+  if(s){CFG=JSON.parse(JSON.stringify(s))}
+  else{CFG={evalType:'both',divisionType:'fixed',threshold:40,exam1:{enabled:true,ratio:30,max:100},exam2:{enabled:true,ratio:30,max:100},perfs:[{id:gid(),name:'수행평가',ratio:40,max:100}],totalHours:68}}
+  if(!CFG.perfs)CFG.perfs=[{id:gid(),name:'수행평가',ratio:40,max:100}];
+}
+
+/* ═══════════════════════════════════════
+   NEIS 성적 파일 파서
+   ═══════════════════════════════════════ */
+function parseNEISGrade(arrayBuffer){
+  const wb=XLSX.read(arrayBuffer,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const range=XLSX.utils.decode_range(ws['!ref']||'A1');
+  
+  // Build raw 2D array
+  const raw=[];
+  for(let r=range.s.r;r<=range.e.r;r++){
+    const row=[];
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const addr=XLSX.utils.encode_cell({r,c});
+      const cell=ws[addr];
+      row.push(cell?cell.v:null);
+    }
+    raw.push(row);
+  }
+
+  // Extract meta info
+  const meta={};
+  for(let i=0;i<Math.min(raw.length,8);i++){
+    const rowStr=raw[i].filter(Boolean).join(' ');
+    // "2026학년도 제1학기"
+    const ym=rowStr.match(/(\d+)학년도\s*제?(\d)학기/);
+    if(ym){meta.year=ym[1];meta.semester=ym[2]}
+    // "통합과학1(3)과목..."
+    const subm=rowStr.match(/^(.+?)\(\d+\)과목/);
+    if(subm)meta.subject=subm[1];
+    // "1학년 글로벌외식조리과"
+    const gm=rowStr.match(/(\d)학년\s+(\S+)/);
+    if(gm&&!meta.grade){meta.grade=gm[1];meta.dept=gm[2]}
+  }
+
+  // Find header row with ratio info: look for cells containing "%(숫자)"
+  let headerRowIdx=-1;
+  const assessments=[];  // {name, ratio, colIdx}
+  
+  for(let i=0;i<Math.min(raw.length,10);i++){
+    const row=raw[i];
+    let foundRatio=false;
+    for(let c=0;c<row.length;c++){
+      const val=String(row[c]||'');
+      const m=val.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
+      if(m){
+        const name=m[1].replace(/\n/g,' ').trim();
+        const ratio=parseFloat(m[2]);
+        // Skip parent categories like "정기시험(60%)" or "수행평가(40%)"
+        // Only keep leaf items (1차고사, 2차고사, individual 수행평가)
+        if(!name.includes('정기시험')&&!name.includes('수행평가')&&!name.includes('평가방법')){
+          assessments.push({name,ratio,colIdx:c});
+          foundRatio=true;
+        }
+      }
+    }
+    if(foundRatio){headerRowIdx=i;break}
+  }
+
+  // If no assessments found with strict filter, retry without filter
+  if(assessments.length===0){
+    for(let i=0;i<Math.min(raw.length,10);i++){
+      const row=raw[i];
+      for(let c=0;c<row.length;c++){
+        const val=String(row[c]||'');
+        const m=val.match(/(.+?)\((\d+\.?\d*)%\)/);
+        if(m){
+          assessments.push({name:m[1].replace(/\n/g,' ').trim(),ratio:parseFloat(m[2]),colIdx:c});
+          if(headerRowIdx===-1)headerRowIdx=i;
+        }
+      }
+    }
+  }
+
+  // Find "반/번호" column and "성명" column from the header area
+  let bnCol=-1,nameCol=-1;
+  for(let i=Math.max(0,headerRowIdx-2);i<=headerRowIdx;i++){
+    for(let c=0;c<(raw[i]||[]).length;c++){
+      const val=String(raw[i][c]||'');
+      if(val.includes('반/번호')||val.includes('반,번호'))bnCol=c;
+    }
+  }
+
+  // Parse data rows: look for "X/Y" pattern (반/번호)
+  const students=[];
+  for(let i=headerRowIdx+1;i<raw.length;i++){
+    const row=raw[i];if(!row)continue;
+    
+    let cls=null,num=null,name=null;
+    
+    // Try to find 반/번호 pattern
+    for(let c=0;c<row.length;c++){
+      const val=String(row[c]||'').trim();
+      const bnMatch=val.match(/^(\d+)\s*\/\s*(\d+)$/);
+      if(bnMatch){
+        cls=bnMatch[1];num=bnMatch[2];
+        // Name is typically 2 columns after (col+2 based on NEIS format)
+        name=String(row[c+2]||'').trim();
+        if(!name){
+          // Try adjacent columns
+          for(let nc=c+1;nc<Math.min(c+4,row.length);nc++){
+            const nv=String(row[nc]||'').trim();
+            if(nv&&!/^\d/.test(nv)&&nv.length>=2){name=nv;break}
+          }
+        }
+        break;
+      }
+    }
+    if(!cls||!name)continue;
+
+    const scores=[];
+    assessments.forEach(a=>{
+      scores.push(parseFloat(row[a.colIdx])||0);
+    });
+    students.push({class:cls,num,name,scores});
+  }
+
+  return{students,assessments,meta};
+}
+
+/* ═══════════════════════════════════════
+   출결 파일 파서
+   ═══════════════════════════════════════ */
+function parseNEISAttend(arrayBuffer){
+  const wb=XLSX.read(arrayBuffer,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+  if(!rows.length)return{students:[],headers:[]};
+  
+  const headers=Object.keys(rows[0]);
+  // Find columns
+  const find=(patterns)=>headers.find(h=>patterns.some(p=>p.test(String(h).replace(/\s/g,''))));
+  const classCol=find([/^반$/,/학급/]);
+  const numCol=find([/^번호$/,/^번$/]);
+  const nameCol=find([/^성명$/,/^이름$/]);
+  const attendCol=find([/출석시수/,/출석일수/,/출석횟수/]);
+  const totalCol=find([/총\s*수업시수/,/현재\s*수업시수/]);
+  const resultCol=find([/이수기준.*충족/,/충족\s*여부/]);
+
+  const students=rows.map(row=>{
+    const cls=String(row[classCol]||'').trim();
+    const num=String(row[numCol]||'').trim();
+    const name=String(row[nameCol]||'').trim();
+    const attend=parseFloat(row[attendCol])||0;
+    
+    // Try to extract total hours from file
+    let totalHours=0;
+    if(totalCol){
+      const tv=String(row[totalCol]||'');
+      const tm=tv.match(/(\d+)/);
+      if(tm)totalHours=parseInt(tm[1]);
+    }
+
+    return{class:cls,num,name,attend,totalHours};
+  }).filter(s=>s.class&&s.num&&s.name);
+
+  // Get totalHours from first row if available
+  const fileTotalHours=students.length>0?students[0].totalHours:0;
+
+  return{students,fileTotalHours};
+}
+
+/* ═══ Render ═══ */
+function render(){
+  const root=document.getElementById('root');
+  if(!API){root.innerHTML=setupPage();return}
+  let h=header();
+  h+=`<div class="container">${loading?'<div class="loading">불러오는 중</div>':mainPage()}</div>`;
+  root.innerHTML=h;
+}
+
+function header(){
+  return`<div class="header"><div><h1><span class="icon">👩‍🏫</span> 최성보 교사용</h1>
+  <div style="font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px">과목 선택 → 파일 업로드 → 대상자 판별
+  <span class="conn ${connected?'conn-ok':'conn-fail'}">● ${connected?'연결됨':'끊김'}</span></div></div>
+  <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙ 연결</button></div></div>`;
+}
+
+function setupPage(){
+  return`<div class="setup-page"><h2>🔗 서버 연결</h2>
+  <p>관리자에게 받은 연결 URL을 붙여넣으세요.</p>
+  <input class="url-input" id="sUrl" placeholder="https://script.google.com/macros/s/...">
+  <button class="btn btn-success" style="width:100%;justify-content:center;padding:12px" onclick="saveApi()">연결하기</button></div>`;
+}
+
+function mainPage(){
+  const ss=subjs();
+  if(!ss.length)return`<div class="card empty"><p style="font-size:15px;margin-bottom:8px">등록된 과목이 없습니다</p><p>관리자가 과목을 등록하면 여기에 나타납니다. 새로고침을 눌러보세요.</p></div>`;
+
+  let h=`<div class="card"><div class="form-grid"><div class="form-group"><label>과목 선택</label>
+    <select onchange="selectSubj(this.value)"><option value="">— 과목을 선택하세요 —</option>
+    ${ss.map(s=>`<option value="${s.id}" ${selId===s.id?'selected':''}>${esc(s.name)} (${esc(s.teacher||'미지정')})</option>`).join('')}
+    </select></div></div></div>`;
+
+  if(!selId)return h+`<div class="card empty">과목을 선택하면 설정 영역이 나타납니다</div>`;
+  const subj=ss.find(s=>s.id===selId);if(!subj)return h;
+  const hasCfg=!!getCfg(selId);const r=getRes(selId);const hasRes=r?.students?.length>0;
+
+  h+=`<div class="step">
+    <span class="step-n ${hasCfg?'step-done':'step-act'}">1</span><span style="font-size:13px;font-weight:600">설정 & 업로드</span>
+    <span class="step-line"></span>
+    <span class="step-n ${hasRes?'step-done':'step-wait'}">2</span><span style="font-size:13px;font-weight:600">결과</span>
+  </div>`;
+
+  // Upload + Config combined
+  h+=uploadAndCfgSection(subj,hasCfg);
+
+  // Results
+  if(hasRes)h+=resultSection(subj,r);
+  return h;
+}
+
+/* ─── Upload + Config Section ─── */
+function uploadAndCfgSection(subj,hasCfg){
+  const ib=CFG.evalType==='both';
+  let h=`<div class="card">
+    <div class="card-header"><span class="card-title">① 파일 업로드 & 설정 — ${esc(subj.name)}</span></div>
+
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group"><label>평가유형</label><select onchange="CFG.evalType=this.value;render()">
+        <option value="both" ${CFG.evalType==='both'?'selected':''}>성적 + 출결</option>
+        <option value="attendanceOnly" ${CFG.evalType==='attendanceOnly'?'selected':''}>출결만</option></select></div>
+      <div class="form-group"><label>수업시수 (총)</label><input type="number" value="${CFG.totalHours}" min="1" onchange="CFG.totalHours=Number(this.value)"></div>
+    </div>`;
+
+  // Grade file upload
+  if(ib){
+    h+=`<p style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px">📊 성적 파일 (나이스)
+      ${gradeData?`<span class="badge badge-green">${gradeData.students.length}명 · ${gradeData.assessments.length}개 평가영역</span>`:''}</p>
+    <div class="file-upload" style="margin-bottom:12px"><input type="file" accept=".xlsx,.xls,.csv" onchange="hGrade(this.files[0])">
+      <div style="font-size:22px;margin-bottom:4px">📊</div>
+      <div style="font-size:13px;color:var(--text2)">나이스 성적 일람표 엑셀 파일</div></div>`;
+
+    if(gradeData){
+      // Show auto-detected info
+      h+=`<div class="auto-msg">✅ 파일에서 자동 감지: ${gradeData.assessments.map(a=>`${a.name}(${a.ratio}%)`).join(', ')}${gradeData.meta.subject?` | 과목: ${gradeData.meta.subject}`:''}</div>`;
+
+      // Show config from detected data
+      h+=`<div style="margin-bottom:16px">
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="form-group"><label>분할점수 유형</label><select onchange="CFG.divisionType=this.value">
+            <option value="fixed" ${CFG.divisionType==='fixed'?'selected':''}>고정분할점수</option>
+            <option value="estimated" ${CFG.divisionType==='estimated'?'selected':''}>추정분할점수</option></select></div>
+          <div class="form-group"><label>성취도 기준점수 (환산 100점 만점 기준)</label><input type="number" value="${CFG.threshold}" min="0" max="100" onchange="CFG.threshold=Number(this.value)"></div>
+        </div>
+        <p style="font-size:13px;font-weight:700;margin-bottom:8px">평가영역 (파일에서 자동 설정됨 — 만점만 확인하세요)</p>`;
+
+      // Show exam1/exam2
+      if(CFG.exam1.enabled){
+        h+=`<div class="perf-row"><span style="min-width:80px;font-size:13px;font-weight:500">1차고사</span>
+          <span class="badge badge-blue">${CFG.exam1.ratio}%</span>
+          <span style="font-size:12px;color:var(--text2)">만점:</span>
+          <input type="number" value="${CFG.exam1.max}" min="1" style="width:70px" onchange="CFG.exam1.max=Number(this.value)"></div>`;
+      }
+      if(CFG.exam2.enabled){
+        h+=`<div class="perf-row"><span style="min-width:80px;font-size:13px;font-weight:500">2차고사</span>
+          <span class="badge badge-blue">${CFG.exam2.ratio}%</span>
+          <span style="font-size:12px;color:var(--text2)">만점:</span>
+          <input type="number" value="${CFG.exam2.max}" min="1" style="width:70px" onchange="CFG.exam2.max=Number(this.value)"></div>`;
+      }
+      CFG.perfs.forEach((p,i)=>{
+        h+=`<div class="perf-row"><span style="min-width:80px;font-size:13px;font-weight:500">${esc(p.name.length>15?p.name.substring(0,15)+'…':p.name)}</span>
+          <span class="badge badge-green">${p.ratio}%</span>
+          <span style="font-size:12px;color:var(--text2)">만점:</span>
+          <input type="number" value="${p.max}" min="1" style="width:70px" onchange="CFG.perfs[${i}].max=Number(this.value)"></div>`;
+      });
+      h+=`</div>`;
+
+      // Preview
+      h+=`<details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;color:var(--text2)">성적 데이터 미리보기 (상위 5명)</summary>
+        <div style="overflow-x:auto;margin-top:6px"><table class="preview-tbl"><thead><tr><th>반</th><th>번호</th><th>성명</th>`;
+      gradeData.assessments.forEach(a=>{h+=`<th>${esc(a.name.length>10?a.name.substring(0,10)+'…':a.name)}</th>`});
+      h+=`</tr></thead><tbody>`;
+      gradeData.students.slice(0,5).forEach(s=>{
+        h+=`<tr><td>${s.class}</td><td>${s.num}</td><td>${esc(s.name)}</td>`;
+        s.scores.forEach(sc=>{h+=`<td>${sc}</td>`});
+        h+=`</tr>`;
+      });
+      h+=`</tbody></table></div></details>`;
+    }
+  }
+
+  // Attend file
+  h+=`<p style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px">📋 출결 파일 (나이스)
+    ${attendData?`<span class="badge badge-green">${attendData.students.length}명</span>`:''}</p>
+  <div class="file-upload"><input type="file" accept=".xlsx,.xls,.csv" onchange="hAttend(this.files[0])">
+    <div style="font-size:22px;margin-bottom:4px">📋</div>
+    <div style="font-size:13px;color:var(--text2)">나이스 과목별출결현황 엑셀 파일</div></div>`;
+
+  if(attendData){
+    h+=`<div class="auto-msg">✅ 출결 데이터 ${attendData.students.length}명${attendData.fileTotalHours?` | 파일 수업시수: ${attendData.fileTotalHours}시간`:''}</div>`;
+  }
+
+  // Run button
+  const canRun=(ib&&gradeData&&gradeData.students.length>0)||(!ib&&attendData&&attendData.students.length>0)||(ib&&gradeData&&attendData);
+  if(canRun){
+    h+=`<div style="text-align:center;margin-top:20px">
+      <button class="btn btn-primary btn-big" onclick="runCalc()">🔍 대상자 판별 실행 & 서버 저장</button>
+    </div>`;
+  }
+  h+=`</div>`;
+  return h;
+}
+
+/* ─── File Handlers ─── */
+async function hGrade(f){
+  if(!f)return;
+  try{
+    const buf=await f.arrayBuffer();
+    gradeData=parseNEISGrade(buf);
+    
+    if(gradeData.students.length===0){toast('학생 데이터를 찾지 못했습니다');return}
+
+    // Auto-fill config from detected assessments
+    const as=gradeData.assessments;
+    const exams=as.filter(a=>/고사|지필|시험/.test(a.name));
+    const perfs=as.filter(a=>!/고사|지필|시험/.test(a.name));
+
+    CFG.exam1={enabled:false,ratio:0,max:100};
+    CFG.exam2={enabled:false,ratio:0,max:100};
+    
+    if(exams.length>=1){CFG.exam1={enabled:true,ratio:exams[0].ratio,max:100}}
+    if(exams.length>=2){CFG.exam2={enabled:true,ratio:exams[1].ratio,max:100}}
+    
+    CFG.perfs=perfs.map(p=>({id:gid(),name:p.name,ratio:p.ratio,max:100}));
+    if(CFG.perfs.length===0&&exams.length===0){
+      // All items are assessments
+      CFG.exam1={enabled:false,ratio:0,max:100};
+      CFG.exam2={enabled:false,ratio:0,max:100};
+      CFG.perfs=as.map(a=>({id:gid(),name:a.name,ratio:a.ratio,max:100}));
+    }
+
+    toast(`성적 파일: ${gradeData.students.length}명, ${as.length}개 영역 감지`);
+    render();
+  }catch(e){toast('파일 읽기 오류: '+e.message);console.error(e)}
+}
+
+async function hAttend(f){
+  if(!f)return;
+  try{
+    const buf=await f.arrayBuffer();
+    attendData=parseNEISAttend(buf);
+    if(attendData.students.length===0){toast('학생 데이터를 찾지 못했습니다');return}
+    // Auto-set totalHours if detected
+    if(attendData.fileTotalHours&&attendData.fileTotalHours>0){
+      CFG.totalHours=attendData.fileTotalHours;
+    }
+    toast(`출결 파일: ${attendData.students.length}명`);
+    render();
+  }catch(e){toast('파일 읽기 오류: '+e.message);console.error(e)}
+}
+
+/* ─── Calculation ─── */
+async function runCalc(){
+  readCfgDOM();
+  const ib=CFG.evalType==='both';
+
+  // Validate
+  if(ib){
+    let t=(CFG.exam1.enabled?CFG.exam1.ratio:0)+(CFG.exam2.enabled?CFG.exam2.ratio:0);
+    CFG.perfs.forEach(p=>t+=p.ratio);
+    if(t!==100)return toast(`반영비율 합계가 ${t}%입니다 (100% 필요)`);
+  }
+
+  // Save config first
+  const cfgCopy=JSON.parse(JSON.stringify(CFG));
+  D['config_'+selId]=cfgCopy;
+  await apiSave('config_'+selId,cfgCopy);
+
+  const sm={};
+  const prev=getRes(selId),pm={};
+  if(prev?.students)prev.students.forEach(s=>{pm[s.class+'-'+s.num]=s});
+
+  // Grade data
+  if(ib&&gradeData){
+    const as=gradeData.assessments;
+    gradeData.students.forEach(s=>{
+      const k=s.class+'-'+s.num;
+      let cv=0;const scores={};
+      // Map assessments to config
+      let examIdx=0,perfIdx=0;
+      as.forEach((a,i)=>{
+        const val=s.scores[i]||0;
+        if(/고사|지필|시험/.test(a.name)){
+          if(examIdx===0&&CFG.exam1.enabled){scores.exam1=val;cv+=(val/CFG.exam1.max)*CFG.exam1.ratio;examIdx++}
+          else if(examIdx===1&&CFG.exam2.enabled){scores.exam2=val;cv+=(val/CFG.exam2.max)*CFG.exam2.ratio;examIdx++}
+        }else{
+          if(perfIdx<CFG.perfs.length){
+            if(!scores.perfs)scores.perfs=[];
+            scores.perfs.push(val);
+            cv+=(val/CFG.perfs[perfIdx].max)*CFG.perfs[perfIdx].ratio;
+            perfIdx++;
+          }
+        }
+      });
+      // If no exam/perf distinction worked, just map sequentially
+      if(!scores.exam1&&!scores.perfs){
+        scores.perfs=[];
+        let ci=0;
+        if(CFG.exam1.enabled&&ci<s.scores.length){scores.exam1=s.scores[ci];cv+=(s.scores[ci]/CFG.exam1.max)*CFG.exam1.ratio;ci++}
+        if(CFG.exam2.enabled&&ci<s.scores.length){scores.exam2=s.scores[ci];cv+=(s.scores[ci]/CFG.exam2.max)*CFG.exam2.ratio;ci++}
+        CFG.perfs.forEach(pf=>{if(ci<s.scores.length){scores.perfs.push(s.scores[ci]);cv+=(s.scores[ci]/pf.max)*pf.ratio;ci++}});
+      }
+      cv=Math.round(cv*100)/100;
+      sm[k]={class:s.class,num:s.num,name:s.name,scores,converted:cv,gradeTarget:cv<CFG.threshold};
+    });
+  }
+
+  // Attend data
+  if(attendData){
+    const th=Math.ceil(CFG.totalHours*(2/3));
+    attendData.students.forEach(s=>{
+      const k=s.class+'-'+s.num;
+      const at=s.attend<th;
+      if(sm[k]){sm[k].attend=s.attend;sm[k].attendTarget=at;sm[k].threshold23=th}
+      else sm[k]={class:s.class,num:s.num,name:s.name,scores:{},converted:null,gradeTarget:false,attend:s.attend,attendTarget:at,threshold23:th};
+    });
+  }
+
+  const students=Object.values(sm).map(s=>{
+    const th=s.threshold23??Math.ceil(CFG.totalHours*(2/3));
+    const isMidal=ib?(s.gradeTarget||(s.attendTarget??false)):(s.attendTarget??false);
+    const reasons=[];if(ib&&s.gradeTarget)reasons.push('성적');if(s.attendTarget)reasons.push('출결');
+    const p=pm[s.class+'-'+s.num];const pd=isMidal?(p?.preventionDone??false):false;
+    return{...s,threshold23:th,isMidal,reasons,preventionDone:pd,isTarget:isMidal&&!pd};
+  });
+  students.sort((a,b)=>a.class!==b.class?a.class.localeCompare(b.class,'ko'):parseInt(a.num)-parseInt(b.num));
+
+  const result={students,updatedAt:new Date().toISOString()};
+  D['results_'+selId]=result;
+  render();
+  await apiSave('results_'+selId,result);
+  toast(`${students.length}명 분석 완료 · 대상자 ${students.filter(s=>s.isTarget).length}명 · 서버 저장 ✓`);
+}
+
+function readCfgDOM(){
+  document.querySelectorAll('[onchange*="CFG.totalHours"]').forEach(el=>{CFG.totalHours=Number(el.value)||68});
+  document.querySelectorAll('[onchange*="CFG.threshold"]').forEach(el=>{CFG.threshold=Number(el.value)||40});
+  document.querySelectorAll('[onchange*="CFG.divisionType"]').forEach(el=>{CFG.divisionType=el.value});
+  document.querySelectorAll('[onchange*="CFG.exam1.max"]').forEach(el=>{CFG.exam1.max=Number(el.value)||100});
+  document.querySelectorAll('[onchange*="CFG.exam2.max"]').forEach(el=>{CFG.exam2.max=Number(el.value)||100});
+  CFG.perfs.forEach((p,i)=>{
+    document.querySelectorAll(`[onchange*="CFG.perfs[${i}].max"]`).forEach(el=>{p.max=Number(el.value)||100});
+  });
+}
+
+/* ─── Results ─── */
+function resultSection(subj,r){
+  const c=getCfg(selId),ib=c?.evalType==='both',stu=r.students;
+  const cls=[...new Set(stu.map(s=>s.class))].sort((a,b)=>a.localeCompare(b,'ko'));
+  const fl=stu.filter(s=>{if(clsFilt&&s.class!==clsFilt)return false;if(onlyMidal&&!s.isMidal)return false;return true});
+  const tot=stu.length,midN=stu.filter(s=>s.isMidal).length,tgtN=stu.filter(s=>s.isTarget).length;
+
+  let h=`<div class="card"><div class="card-header"><span class="card-title">② 분석 결과</span>
+    <button class="btn btn-success btn-sm" onclick="expXL()">📥 엑셀 내보내기</button></div>
+    <div class="stats">
+      <div class="stat-card"><div class="num">${tot}</div><div class="lb">전체</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--amber)">${midN}</div><div class="lb">미달</div></div>
+      <div class="stat-card hl"><div class="num">${tgtN}</div><div class="lb">최종 대상자</div></div>
+    </div>
+    <div class="filter-bar">
+      <div class="form-group" style="min-width:100px"><label>반</label><select onchange="clsFilt=this.value;render()"><option value="">전체</option>${cls.map(c=>`<option value="${c}" ${clsFilt===c?'selected':''}>${c}반</option>`).join('')}</select></div>
+      <label class="check-row" style="padding-bottom:4px"><input type="checkbox" ${onlyMidal?'checked':''} onchange="onlyMidal=this.checked;render()"><span style="font-size:13px">미달자만</span></label>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>반</th><th>번호</th><th>성명</th>`;
+  if(ib){
+    if(c.exam1?.enabled)h+=`<th class="tr">1차</th>`;
+    if(c.exam2?.enabled)h+=`<th class="tr">2차</th>`;
+    if(c.perfs)c.perfs.forEach(p=>{h+=`<th class="tr">${esc(p.name.length>8?p.name.substring(0,8)+'…':p.name)}</th>`});
+    h+=`<th class="tr">환산</th><th class="tc">성적</th>`;
+  }
+  h+=`<th class="tr">출석</th><th class="tc">출결</th><th class="tc">예방지도</th><th class="tc">최종</th></tr></thead><tbody>`;
+
+  fl.forEach(s=>{
+    h+=`<tr class="${s.isTarget?'row-target':''}"><td>${esc(s.class)}</td><td>${s.num}</td><td style="font-weight:500">${esc(s.name)}</td>`;
+    if(ib){
+      if(c.exam1?.enabled)h+=`<td class="tr">${s.scores?.exam1??'—'}</td>`;
+      if(c.exam2?.enabled)h+=`<td class="tr">${s.scores?.exam2??'—'}</td>`;
+      if(c.perfs)c.perfs.forEach((_,i)=>{h+=`<td class="tr">${s.scores?.perfs?.[i]??'—'}</td>`});
+      h+=`<td class="tr" style="font-weight:700;${s.gradeTarget?'color:var(--red)':''}">${s.converted??'—'}</td>`;
+      h+=`<td class="tc">${s.converted!=null?(s.gradeTarget?'<span class="badge badge-red">미달</span>':'<span class="badge badge-green">도달</span>'):''}</td>`;
+    }
+    h+=`<td class="tr">${s.attend!=null?s.attend+'/'+s.threshold23:'—'}</td>`;
+    h+=`<td class="tc">${s.attend!=null?(s.attendTarget?'<span class="badge badge-red">미달</span>':'<span class="badge badge-green">충족</span>'):''}</td>`;
+    if(s.isMidal){h+=`<td class="tc"><select class="isel" onchange="togPrev('${s.class}','${s.num}',this.value)"><option value="n" ${!s.preventionDone?'selected':''}>미이수</option><option value="y" ${s.preventionDone?'selected':''}>이수</option></select></td>`}
+    else{h+=`<td class="tc" style="color:var(--text3)">—</td>`}
+    h+=`<td class="tc">${s.isTarget?'<span class="badge badge-target">대상자</span>':'<span style="color:var(--text3)">—</span>'}</td></tr>`;
+  });
+  h+=`</tbody></table></div></div>`;return h;
+}
+
+async function togPrev(cls,num,v){
+  const r=getRes(selId);if(!r?.students)return;
+  const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
+  s.preventionDone=(v==='y');s.isTarget=s.isMidal&&!s.preventionDone;
+  D['results_'+selId]=r;render();
+  await apiSave('results_'+selId,r);
+  toast(s.preventionDone?`${s.name} 이수 처리 → 대상 제외`:`${s.name} 미이수 → 대상자`);
+}
+
+function selectSubj(id){selId=id;clsFilt='';onlyMidal=false;gradeData=null;attendData=null;if(id)loadCfg(id);render()}
+function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
+function chgApi(){const u=prompt('연결 URL:',API);if(u===null)return;API=u.trim();localStorage.setItem('mast_api',API);if(API)loadData();else render()}
+
+function expXL(){
+  const subj=subjs().find(s=>s.id===selId),c=getCfg(selId),r=getRes(selId);if(!subj||!r?.students)return;const ib=c?.evalType==='both';
+  const rows=r.students.map(s=>{const row={'반':s.class,'번호':s.num,'성명':s.name};
+    if(ib){if(c.exam1?.enabled)row['1차']=s.scores?.exam1??'';if(c.exam2?.enabled)row['2차']=s.scores?.exam2??'';
+      if(c.perfs)c.perfs.forEach((pf,i)=>{row[pf.name]=s.scores?.perfs?.[i]??''});
+      row['환산점수']=s.converted;row['기준']=c.threshold;row['성적']=s.gradeTarget?'미달':'도달'}
+    row['출석']=s.attend??'';row['출석기준']=s.threshold23;row['출결']=s.attendTarget?'미달':(s.attend!=null?'충족':'');
+    row['예방지도']=s.preventionDone?'이수':(s.isMidal?'미이수':'');row['최종']=s.isTarget?'대상자':'';row['사유']=(s.reasons||[]).join(', ');return row});
+  const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,subj.name.substring(0,31));XLSX.writeFile(wb,`최성보_${subj.name}.xlsx`)}
+
+if(API)loadData();else render();
+</script>
+</body>
+</html>

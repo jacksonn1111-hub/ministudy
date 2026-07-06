@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>최성보 관리자</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--text2:#64748b;--text3:#94a3b8;--blue:#2563eb;--blue-l:#dbeafe;--green:#059669;--green-l:#d1fae5;--amber:#d97706;--amber-l:#fef3c7;--red:#dc2626;--red-l:#fee2e2;--rose-bg:#fff1f2;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+button{cursor:pointer;font:inherit}input,select{font:inherit}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
+.header h1 .icon{width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav{display:flex;gap:2px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px}
+.nav button{padding:12px 20px;font-size:13px;font-weight:600;color:var(--text2);background:none;border:none;border-bottom:2.5px solid transparent;transition:.15s}
+.nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
+.nav button:hover:not(.active){color:var(--text);background:#f8fafc}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:12px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.card-title{font-size:15px;font-weight:700}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-blue{background:var(--blue-l);color:var(--blue)}.badge-green{background:var(--green-l);color:var(--green)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}.badge-red{background:var(--red-l);color:var(--red)}
+.badge-slate{background:#f1f5f9;color:var(--text2)}.badge-target{background:var(--red);color:#fff;font-weight:700}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#047857}
+.btn-danger{background:var(--red-l);color:var(--red)}.btn-danger:hover{background:#fecaca}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:#f8fafc}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-group{display:flex;gap:6px;flex-wrap:wrap}
+.form-row{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;font-weight:600;color:var(--text2)}
+.form-group input,.form-group select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
+.form-group input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#f8fafc;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
+thead th.tc{text-align:center}thead th.tr{text-align:right}
+tbody td{padding:9px 12px;border-bottom:1px solid #f1f5f9}
+tbody td.tc{text-align:center}tbody td.tr{text-align:right}
+tbody tr:hover{background:#fafbfc}
+tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{background:#ffe4e6}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stat-card .num{font-size:28px;font-weight:800}.stat-card .lb{font-size:11px;color:var(--text2);margin-top:2px}
+.stat-card.hl{border-color:#fca5a5;background:var(--rose-bg)}.stat-card.hl .num{color:var(--red)}
+.subj-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:8px}
+.subj-item:last-child{border-bottom:none}
+.empty{text-align:center;padding:40px;color:var(--text2)}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:1000;opacity:0;transform:translateY(20px);transition:.3s;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}
+.loading{text-align:center;padding:32px;color:var(--text2);font-size:13px}
+.loading::after{content:'';display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite;margin-left:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.setup-page{max-width:520px;margin:60px auto;padding:24px}
+.setup-page h2{font-size:20px;font-weight:800;margin-bottom:8px}
+.setup-page p{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8}
+.setup-page ol{font-size:13px;color:var(--text2);margin:0 0 20px 20px;line-height:2.2}
+.setup-page .url-input{width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:12px}
+.setup-page .url-input:focus{outline:none;border-color:var(--blue)}
+.conn{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:6px}
+.conn-ok{background:var(--green-l);color:var(--green)}.conn-fail{background:var(--red-l);color:var(--red)}
+@media(max-width:768px){.container{padding:16px}.form-row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast" id="toast"></div>
+<script>
+let API=localStorage.getItem('mast_api')||'https://script.google.com/macros/s/AKfycbwpzHsmHgM6Fcp_SvkduhwalTo_zSOEj1SwyGI9Ph0HV1Z_Iksyy_x_dvaIlQm3OhMYKA/exec',page='subjects',D={},loading=false,connected=false,dashFilter='';
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+async function apiGet(){if(!API)return{};const r=await fetch(API+'?action=getAll');return r.json()}
+async function apiSave(k,v){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'save',key:k,value:v}),redirect:'follow'}).catch(()=>{})}
+async function apiDel(k){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'delete',key:k}),redirect:'follow'}).catch(()=>{})}
+
+async function loadData(){loading=true;render();try{D=await apiGet();connected=true}catch(e){connected=false;toast('연결 실패')}loading=false;render()}
+function subjs(){return D.subjects||[]}
+function cfg(id){return D['config_'+id]||null}
+function res(id){return D['results_'+id]||null}
+
+function render(){
+  const root=document.getElementById('root');
+  if(!API){root.innerHTML=setupPage();return}
+  let h=header();
+  h+=`<div class="nav">${[{id:'subjects',l:'과목 관리'},{id:'dashboard',l:'대상자 현황'}].map(p=>`<button class="${page===p.id?'active':''}" onclick="page='${p.id}';render()">${p.l}${p.id==='subjects'&&subjs().length?`<span class="badge badge-blue" style="margin-left:6px">${subjs().length}</span>`:''}</button>`).join('')}</div>`;
+  h+=`<div class="container">${loading?'<div class="loading">불러오는 중</div>':(page==='subjects'?subjPage():dashPage())}</div>`;
+  root.innerHTML=h;
+}
+
+function header(){
+  return`<div class="header"><div><h1><span class="icon">📋</span> 최성보 관리자</h1>
+  <div style="font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px">과목 등록 · 대상자 현황
+  <span class="conn ${connected?'conn-ok':'conn-fail'}">● ${connected?'연결됨':'끊김'}</span></div></div>
+  <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙ 연결설정</button></div></div>`;
+}
+
+function setupPage(){
+  return`<div class="setup-page"><h2>🔗 서버 연결</h2>
+  <p>Google 스프레드시트에 Apps Script를 배포하고, 웹 앱 URL을 붙여넣으세요.</p>
+  <ol><li>새 Google 스프레드시트 만들기</li><li>확장 프로그램 → Apps Script</li><li>제공된 코드 붙여넣기 → 저장</li><li>배포 → 새 배포 → 웹 앱 (누구나)</li><li>웹 앱 URL 복사</li></ol>
+  <input class="url-input" id="sUrl" placeholder="https://script.google.com/macros/s/...">
+  <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="saveApi()">연결하기</button></div>`;
+}
+
+function subjPage(){
+  const ss=subjs();
+  let h=`<div class="card"><div class="card-header"><span class="card-title">과목 등록</span></div>
+  <div class="form-row">
+    <div class="form-group" style="flex:1"><label>과목명 *</label><input id="iN" placeholder="예: 국어" onkeydown="if(event.key==='Enter')addS()"></div>
+    <div class="form-group" style="flex:1"><label>담당 선생님</label><input id="iT" placeholder="예: 홍길동" onkeydown="if(event.key==='Enter')addS()"></div>
+    <button class="btn btn-primary" onclick="addS()" style="margin-top:auto">+ 추가</button>
+  </div></div>`;
+  h+=`<div class="card"><div class="card-header"><span class="card-title">등록 과목 (${ss.length})</span></div>`;
+  if(!ss.length){h+=`<div class="empty">등록된 과목이 없습니다</div>`}
+  else ss.forEach((s,i)=>{
+    const c=cfg(s.id),r=res(s.id),hasR=r?.students?.length>0,tN=hasR?r.students.filter(x=>x.isTarget).length:0;
+    h+=`<div class="subj-item"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+      <span style="color:var(--text3);font-size:12px;min-width:20px">${i+1}</span>
+      <strong>${esc(s.name)}</strong><span style="font-size:12px;color:var(--text2)">${esc(s.teacher||'미지정')}</span>
+      ${c?'<span class="badge badge-green">설정완료</span>':'<span class="badge badge-slate">미설정</span>'}
+      ${hasR?`<span class="badge badge-blue">${r.students.length}명</span>`:''}
+      ${tN>0?`<span class="badge badge-red">대상자 ${tN}</span>`:''}
+    </div><div class="btn-group" style="flex-shrink:0">
+      <button class="btn btn-outline btn-sm" onclick="editS('${s.id}')">수정</button>
+      <button class="btn btn-danger btn-sm" onclick="delS('${s.id}')">삭제</button>
+    </div></div>`;
+  });
+  h+=`</div>`;return h;
+}
+
+function dashPage(){
+  const ss=subjs(),allT=[],st=[];
+  ss.forEach(s=>{const c=cfg(s.id),r=res(s.id),stu=r?.students||[],tot=stu.length,mid=stu.filter(x=>x.isMidal).length,tgt=stu.filter(x=>x.isTarget).length;
+    st.push({s,c,tot,mid,tgt,up:tot>0});
+    stu.filter(x=>x.isTarget).forEach(x=>{allT.push({...x,sn:s.name,tc:s.teacher})});
+  });
+  const tT=allT.length,tM=st.reduce((a,b)=>a+b.mid,0),uN=st.filter(x=>x.up).length;
+  let h=`<div class="stats">
+    <div class="stat-card"><div class="num">${ss.length}</div><div class="lb">전체 과목</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--green)">${uN}</div><div class="lb">결과 등록</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--amber)">${tM}</div><div class="lb">미달 합계</div></div>
+    <div class="stat-card hl"><div class="num">${tT}</div><div class="lb">최종 대상자</div></div>
+  </div>`;
+  h+=`<div class="card"><div class="card-header"><span class="card-title">과목별 현황</span>
+    <button class="btn btn-success btn-sm" onclick="expAll()">📥 전과목 엑셀</button></div>
+    <div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th class="tc">유형</th><th class="tc">상태</th><th class="tr">학생</th><th class="tr">미달</th><th class="tr">대상자</th></tr></thead><tbody>`;
+  st.forEach(({s,c,tot,mid,tgt,up})=>{
+    h+=`<tr><td style="font-weight:600">${esc(s.name)}</td><td>${esc(s.teacher||'—')}</td>
+    <td class="tc">${c?`<span class="badge ${c.evalType==='both'?'badge-blue':'badge-green'}">${c.evalType==='both'?'성적+출결':'출결만'}</span>`:'<span class="badge badge-slate">미설정</span>'}</td>
+    <td class="tc">${up?'<span class="badge badge-green">완료</span>':'<span class="badge badge-slate">대기</span>'}</td>
+    <td class="tr">${up?tot:'—'}</td><td class="tr">${up?mid:'—'}</td>
+    <td class="tr" style="font-weight:700;${tgt>0?'color:var(--red)':''}">${up?tgt:'—'}</td></tr>`;
+  });
+  h+=`</tbody></table></div></div>`;
+
+  h+=`<div class="card"><div class="card-header"><span class="card-title">최종 대상자 (${tT}명)</span>
+    <div class="form-group" style="min-width:130px"><select onchange="dashFilter=this.value;render()">
+      <option value="">전체</option>${ss.map(s=>`<option value="${s.name}" ${dashFilter===s.name?'selected':''}>${esc(s.name)}</option>`).join('')}
+    </select></div></div>`;
+  const fl=dashFilter?allT.filter(t=>t.sn===dashFilter):allT;
+  if(!fl.length){h+=`<div class="empty">${tT?'해당 과목에 대상자 없음':'대상자 없음'}</div>`}
+  else{h+=`<div class="table-wrap"><table><thead><tr><th>과목</th><th>담당</th><th>반</th><th>번호</th><th>성명</th><th class="tc">사유</th></tr></thead><tbody>`;
+    fl.forEach(t=>{h+=`<tr class="row-target"><td>${esc(t.sn)}</td><td>${esc(t.tc||'—')}</td><td>${esc(t.class)}</td><td>${t.num}</td><td style="font-weight:600">${esc(t.name)}</td><td class="tc">${(t.reasons||[]).map(r=>`<span class="badge badge-red">${r}</span>`).join(' ')}</td></tr>`});
+    h+=`</tbody></table></div>`}
+  h+=`</div>`;return h;
+}
+
+async function addS(){const n=document.getElementById('iN'),t=document.getElementById('iT');const nm=n.value.trim(),tc=t.value.trim();
+  if(!nm)return toast('과목명 입력');const ss=subjs();const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  ss.push({id,name:nm,teacher:tc});D.subjects=ss;n.value='';t.value='';render();await apiSave('subjects',ss);toast(`"${nm}" 추가`)}
+async function editS(id){const ss=subjs(),s=ss.find(x=>x.id===id);if(!s)return;
+  const nm=prompt('과목명:',s.name);if(nm===null)return;const tc=prompt('담당 선생님:',s.teacher||'');if(tc===null)return;
+  s.name=nm.trim()||s.name;s.teacher=tc.trim();D.subjects=ss;render();await apiSave('subjects',ss);toast('수정 완료')}
+async function delS(id){if(!confirm('삭제하시겠습니까?'))return;D.subjects=subjs().filter(s=>s.id!==id);delete D['config_'+id];delete D['results_'+id];
+  render();await apiSave('subjects',D.subjects);await apiDel('config_'+id);await apiDel('results_'+id);toast('삭제 완료')}
+function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
+function chgApi(){const u=prompt('Apps Script URL:',API);if(u===null)return;API=u.trim();localStorage.setItem('mast_api',API);if(API)loadData();else render()}
+
+function expAll(){
+  const wb=XLSX.utils.book_new();let has=false;const tgts=[];
+  subjs().forEach(s=>{const c=cfg(s.id),r=res(s.id);if(!r?.students?.length)return;const ib=c?.evalType==='both';
+    const rows=r.students.map(x=>{const row={'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name};
+      if(ib){row['환산']=x.converted;row['기준']=c.threshold;row['성적']=x.gradeTarget?'미달':'도달'}
+      row['출석']=x.attend??'';row['기준']=x.threshold23;row['출결']=x.attendTarget?'미달':(x.attend!=null?'충족':'');
+      row['예방지도']=x.preventionDone?'이수':(x.isMidal?'미이수':'');row['최종']=x.isTarget?'대상자':'';row['사유']=(x.reasons||[]).join(', ');return row});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),s.name.substring(0,31));has=true;
+    r.students.filter(x=>x.isTarget).forEach(x=>{tgts.push({'과목':s.name,'담당':s.teacher,'반':x.class,'번호':x.num,'성명':x.name,'사유':(x.reasons||[]).join(', ')})})});
+  if(tgts.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(tgts),'최종 대상자');
+  if(!has&&!tgts.length)return toast('데이터 없음');XLSX.writeFile(wb,'최성보_전과목.xlsx')}
+
+if(API)loadData();else render();
+</script>
+</body>
+</html>
