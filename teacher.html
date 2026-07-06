@@ -13,7 +13,11 @@ button{cursor:pointer;font:inherit}input,select{font:inherit}
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .header h1{font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
 .header h1 .icon{width:34px;height:34px;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.container{max-width:1000px;margin:0 auto;padding:24px}
+.nav{display:flex;gap:2px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px}
+.nav button{padding:12px 20px;font-size:13px;font-weight:600;color:var(--text2);background:none;border:none;border-bottom:2.5px solid transparent;transition:.15s}
+.nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
+.nav button:hover:not(.active){color:var(--text);background:#f8fafc}
+.container{max-width:1060px;margin:0 auto;padding:24px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:12px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
 .card-title{font-size:15px;font-weight:700}
@@ -29,17 +33,16 @@ button{cursor:pointer;font:inherit}input,select{font:inherit}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-group{display:flex;gap:6px;flex-wrap:wrap}
 .btn-big{padding:14px 36px;font-size:15px}
+.btn-x{width:24px;height:24px;border-radius:50%;background:var(--red-l);color:var(--red);border:none;font-size:14px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.btn-x:hover{background:var(--red);color:#fff}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-group{display:flex;flex-direction:column;gap:4px}
 .form-group label{font-size:12px;font-weight:600;color:var(--text2)}
 .form-group input,.form-group select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
 .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-.check-row{display:flex;align-items:center;gap:8px}
-.check-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}
 .perf-row{display:flex;align-items:center;gap:8px;padding:5px 0;flex-wrap:wrap}
-.perf-row input{max-width:120px}
 select.isel{padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fff}
-.file-upload{border:2px dashed var(--border);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.15s;position:relative}
+.file-upload{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:.15s;position:relative}
 .file-upload:hover{border-color:var(--blue);background:var(--blue-l)}
 .file-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
 .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
@@ -50,9 +53,10 @@ tbody td{padding:8px 12px;border-bottom:1px solid #f1f5f9}
 tbody td.tc{text-align:center}tbody td.tr{text-align:right}
 tbody tr:hover{background:#fafbfc}
 tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{background:#ffe4e6}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px}
+tbody tr.row-dim{opacity:.45}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:16px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
-.stat-card .num{font-size:26px;font-weight:800}.stat-card .lb{font-size:11px;color:var(--text2);margin-top:2px}
+.stat-card .num{font-size:24px;font-weight:800}.stat-card .lb{font-size:11px;color:var(--text2);margin-top:2px}
 .stat-card.hl{border-color:#fca5a5;background:var(--rose-bg)}.stat-card.hl .num{color:var(--red)}
 .filter-bar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .empty{text-align:center;padding:40px;color:var(--text2)}
@@ -65,18 +69,11 @@ tbody tr.row-target{background:var(--rose-bg)}tbody tr.row-target:hover{backgrou
 .setup-page h2{font-size:20px;font-weight:800;margin-bottom:8px}
 .setup-page p{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8}
 .setup-page .url-input{width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:12px}
-.setup-page .url-input:focus{outline:none;border-color:var(--green)}
 .conn{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:6px}
 .conn-ok{background:var(--green-l);color:var(--green)}.conn-fail{background:var(--red-l);color:var(--red)}
-.step{display:flex;align-items:center;gap:8px;margin-bottom:20px}
-.step-n{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
-.step-done{background:var(--green-l);color:var(--green)}.step-act{background:var(--blue);color:#fff}.step-wait{background:#f1f5f9;color:var(--text3)}
-.step-line{flex:1;height:2px;background:var(--border)}
+.auto-msg{background:var(--green-l);border:1px solid #a7f3d0;border-radius:8px;padding:10px 16px;font-size:12px;color:#065f46;margin:8px 0}
+.file-list{margin:8px 0}.file-item{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:#f8fafc;border-radius:6px;margin:4px 0;font-size:12px}
 hr.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
-.auto-msg{background:var(--green-l);border:1px solid #a7f3d0;border-radius:8px;padding:10px 16px;font-size:12px;color:#065f46;margin:12px 0;display:flex;align-items:center;gap:8px}
-.preview-tbl{font-size:12px;margin-top:8px}
-.preview-tbl td,.preview-tbl th{padding:4px 8px;border:1px solid var(--border)}
-.preview-tbl th{background:#f8fafc}
 @media(max-width:768px){.container{padding:16px}.form-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -85,545 +82,370 @@ hr.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div class="toast" id="toast"></div>
 <script>
 let API=localStorage.getItem('mast_api')||'https://script.google.com/macros/s/AKfycbwpzHsmHgM6Fcp_SvkduhwalTo_zSOEj1SwyGI9Ph0HV1Z_Iksyy_x_dvaIlQm3OhMYKA/exec';
-let D={},loading=false,connected=false;
-let selId='',clsFilt='',onlyMidal=false;
+let D={},loading=false,connected=false,tab='main',selId='',clsFilt='',onlyMidal=false;
 
-// Parsed file data
-let gradeData=null;  // {students:[], assessments:[], meta:{}}
-let attendData=null; // {students:[]}
+// Multi-file storage
+let gradeFiles=[];   // [{name, students:[], assessments:[], meta:{}}]
+let attendFiles=[];  // [{name, students:[], fileTotalHours}]
+let totalHoursFromFile=0;
 
-let CFG={evalType:'both',divisionType:'fixed',threshold:40,exam1:{enabled:true,ratio:30,max:100},exam2:{enabled:true,ratio:30,max:100},perfs:[{id:'p1',name:'수행평가',ratio:40,max:100}],totalHours:68};
+let CFG={divisionType:'fixed',threshold:40,exam1:{enabled:true,ratio:30,max:100},exam2:{enabled:true,ratio:30,max:100},perfs:[{id:'p1',name:'수행평가',ratio:40,max:100}]};
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-
 async function apiGet(){if(!API)return{};const r=await fetch(API+'?action=getAll');return r.json()}
 async function apiSave(k,v){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'save',key:k,value:v}),redirect:'follow'}).catch(()=>{})}
+async function apiDel(k){if(!API)return;await fetch(API,{method:'POST',body:JSON.stringify({action:'delete',key:k}),redirect:'follow'}).catch(()=>{})}
 async function loadData(){loading=true;render();try{D=await apiGet();connected=true}catch{connected=false;toast('연결 실패')}loading=false;render()}
 function subjs(){return D.subjects||[]}
 function getCfg(id){return D['config_'+id]||null}
 function getRes(id){return D['results_'+id]||null}
+function loadCfg(id){const s=getCfg(id);if(s)CFG=JSON.parse(JSON.stringify(s));else CFG={divisionType:'fixed',threshold:40,exam1:{enabled:true,ratio:30,max:100},exam2:{enabled:true,ratio:30,max:100},perfs:[{id:gid(),name:'수행평가',ratio:40,max:100}]};if(!CFG.perfs)CFG.perfs=[]}
 
-function loadCfg(id){
-  const s=getCfg(id);
-  if(s){CFG=JSON.parse(JSON.stringify(s))}
-  else{CFG={evalType:'both',divisionType:'fixed',threshold:40,exam1:{enabled:true,ratio:30,max:100},exam2:{enabled:true,ratio:30,max:100},perfs:[{id:gid(),name:'수행평가',ratio:40,max:100}],totalHours:68}}
-  if(!CFG.perfs)CFG.perfs=[{id:gid(),name:'수행평가',ratio:40,max:100}];
-}
-
-/* ═══════════════════════════════════════
-   NEIS 성적 파일 파서
-   ═══════════════════════════════════════ */
-function parseNEISGrade(arrayBuffer){
-  const wb=XLSX.read(arrayBuffer,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const range=XLSX.utils.decode_range(ws['!ref']||'A1');
-  
-  // Build raw 2D array
-  const raw=[];
-  for(let r=range.s.r;r<=range.e.r;r++){
-    const row=[];
-    for(let c=range.s.c;c<=range.e.c;c++){
-      const addr=XLSX.utils.encode_cell({r,c});
-      const cell=ws[addr];
-      row.push(cell?cell.v:null);
-    }
-    raw.push(row);
-  }
-
-  // Extract meta info
+/* ═══ NEIS Parsers ═══ */
+function parseNEISGrade(buf){
+  const wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rng=XLSX.utils.decode_range(ws['!ref']||'A1');
+  const raw=[];for(let r=rng.s.r;r<=rng.e.r;r++){const row=[];for(let c=rng.s.c;c<=rng.e.c;c++){const a=XLSX.utils.encode_cell({r,c}),cell=ws[a];row.push(cell?cell.v:null)}raw.push(row)}
   const meta={};
-  for(let i=0;i<Math.min(raw.length,8);i++){
-    const rowStr=raw[i].filter(Boolean).join(' ');
-    // "2026학년도 제1학기"
-    const ym=rowStr.match(/(\d+)학년도\s*제?(\d)학기/);
-    if(ym){meta.year=ym[1];meta.semester=ym[2]}
-    // "통합과학1(3)과목..."
-    const subm=rowStr.match(/^(.+?)\(\d+\)과목/);
-    if(subm)meta.subject=subm[1];
-    // "1학년 글로벌외식조리과"
-    const gm=rowStr.match(/(\d)학년\s+(\S+)/);
-    if(gm&&!meta.grade){meta.grade=gm[1];meta.dept=gm[2]}
-  }
-
-  // Find header row with ratio info: look for cells containing "%(숫자)"
-  let headerRowIdx=-1;
-  const assessments=[];  // {name, ratio, colIdx}
-  
-  for(let i=0;i<Math.min(raw.length,10);i++){
-    const row=raw[i];
-    let foundRatio=false;
-    for(let c=0;c<row.length;c++){
-      const val=String(row[c]||'');
-      const m=val.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
-      if(m){
-        const name=m[1].replace(/\n/g,' ').trim();
-        const ratio=parseFloat(m[2]);
-        // Skip parent categories like "정기시험(60%)" or "수행평가(40%)"
-        // Only keep leaf items (1차고사, 2차고사, individual 수행평가)
-        if(!name.includes('정기시험')&&!name.includes('수행평가')&&!name.includes('평가방법')){
-          assessments.push({name,ratio,colIdx:c});
-          foundRatio=true;
-        }
-      }
-    }
-    if(foundRatio){headerRowIdx=i;break}
-  }
-
-  // If no assessments found with strict filter, retry without filter
-  if(assessments.length===0){
-    for(let i=0;i<Math.min(raw.length,10);i++){
-      const row=raw[i];
-      for(let c=0;c<row.length;c++){
-        const val=String(row[c]||'');
-        const m=val.match(/(.+?)\((\d+\.?\d*)%\)/);
-        if(m){
-          assessments.push({name:m[1].replace(/\n/g,' ').trim(),ratio:parseFloat(m[2]),colIdx:c});
-          if(headerRowIdx===-1)headerRowIdx=i;
-        }
-      }
-    }
-  }
-
-  // Find "반/번호" column and "성명" column from the header area
-  let bnCol=-1,nameCol=-1;
-  for(let i=Math.max(0,headerRowIdx-2);i<=headerRowIdx;i++){
-    for(let c=0;c<(raw[i]||[]).length;c++){
-      const val=String(raw[i][c]||'');
-      if(val.includes('반/번호')||val.includes('반,번호'))bnCol=c;
-    }
-  }
-
-  // Parse data rows: look for "X/Y" pattern (반/번호)
+  for(let i=0;i<Math.min(raw.length,8);i++){const rs=raw[i].filter(Boolean).join(' ');
+    const ym=rs.match(/(\d+)학년도\s*제?(\d)학기/);if(ym){meta.year=ym[1];meta.semester=ym[2]}
+    const sm=rs.match(/^(.+?)\(\d+\)과목/);if(sm)meta.subject=sm[1];
+    const gm=rs.match(/(\d)학년\s+(\S+)/);if(gm&&!meta.grade){meta.grade=gm[1];meta.dept=gm[2]}}
+  let hdrIdx=-1;const assessments=[];
+  for(let i=0;i<Math.min(raw.length,10);i++){const row=raw[i];let found=false;
+    for(let c=0;c<row.length;c++){const v=String(row[c]||''),m=v.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
+      if(m){const nm=m[1].replace(/\n/g,' ').trim();if(!/정기시험|수행평가\(|평가방법/.test(nm)){assessments.push({name:nm,ratio:parseFloat(m[2]),colIdx:c});found=true}}}
+    if(found){hdrIdx=i;break}}
   const students=[];
-  for(let i=headerRowIdx+1;i<raw.length;i++){
-    const row=raw[i];if(!row)continue;
-    
-    let cls=null,num=null,name=null;
-    
-    // Try to find 반/번호 pattern
-    for(let c=0;c<row.length;c++){
-      const val=String(row[c]||'').trim();
-      const bnMatch=val.match(/^(\d+)\s*\/\s*(\d+)$/);
-      if(bnMatch){
-        cls=bnMatch[1];num=bnMatch[2];
-        // Name is typically 2 columns after (col+2 based on NEIS format)
-        name=String(row[c+2]||'').trim();
-        if(!name){
-          // Try adjacent columns
-          for(let nc=c+1;nc<Math.min(c+4,row.length);nc++){
-            const nv=String(row[nc]||'').trim();
-            if(nv&&!/^\d/.test(nv)&&nv.length>=2){name=nv;break}
-          }
-        }
-        break;
-      }
-    }
-    if(!cls||!name)continue;
+  for(let i=hdrIdx+1;i<raw.length;i++){const row=raw[i];if(!row)continue;let cls=null,num=null,name=null;
+    for(let c=0;c<row.length;c++){const v=String(row[c]||'').trim(),bn=v.match(/^(\d+)\s*\/\s*(\d+)$/);
+      if(bn){cls=bn[1];num=bn[2];for(let nc=c+1;nc<Math.min(c+4,row.length);nc++){const nv=String(row[nc]||'').trim();if(nv&&!/^\d/.test(nv)&&nv.length>=2){name=nv;break}}break}}
+    if(!cls||!name)continue;const scores=[];assessments.forEach(a=>{scores.push(parseFloat(row[a.colIdx])||0)});
+    students.push({class:cls,num,name,scores})}
+  return{students,assessments,meta}}
 
-    const scores=[];
-    assessments.forEach(a=>{
-      scores.push(parseFloat(row[a.colIdx])||0);
-    });
-    students.push({class:cls,num,name,scores});
-  }
-
-  return{students,assessments,meta};
-}
-
-/* ═══════════════════════════════════════
-   출결 파일 파서
-   ═══════════════════════════════════════ */
-function parseNEISAttend(arrayBuffer){
-  const wb=XLSX.read(arrayBuffer,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-  if(!rows.length)return{students:[],headers:[]};
-  
-  const headers=Object.keys(rows[0]);
-  // Find columns
-  const find=(patterns)=>headers.find(h=>patterns.some(p=>p.test(String(h).replace(/\s/g,''))));
-  const classCol=find([/^반$/,/학급/]);
-  const numCol=find([/^번호$/,/^번$/]);
-  const nameCol=find([/^성명$/,/^이름$/]);
-  const attendCol=find([/출석시수/,/출석일수/,/출석횟수/]);
-  const totalCol=find([/총\s*수업시수/,/현재\s*수업시수/]);
-  const resultCol=find([/이수기준.*충족/,/충족\s*여부/]);
-
-  const students=rows.map(row=>{
-    const cls=String(row[classCol]||'').trim();
-    const num=String(row[numCol]||'').trim();
-    const name=String(row[nameCol]||'').trim();
-    const attend=parseFloat(row[attendCol])||0;
-    
-    // Try to extract total hours from file
-    let totalHours=0;
-    if(totalCol){
-      const tv=String(row[totalCol]||'');
-      const tm=tv.match(/(\d+)/);
-      if(tm)totalHours=parseInt(tm[1]);
-    }
-
-    return{class:cls,num,name,attend,totalHours};
-  }).filter(s=>s.class&&s.num&&s.name);
-
-  // Get totalHours from first row if available
-  const fileTotalHours=students.length>0?students[0].totalHours:0;
-
-  return{students,fileTotalHours};
-}
+function parseNEISAttend(buf){
+  const wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+  if(!rows.length)return{students:[],fileTotalHours:0};
+  const hd=Object.keys(rows[0]),find=ps=>hd.find(h=>ps.some(p=>p.test(String(h).replace(/\s/g,''))));
+  const cC=find([/^반$/]),nC=find([/^번호$/]),nmC=find([/^성명$/,/^이름$/]),aC=find([/출석시수/,/출석일수/]),tC=find([/총.*수업시수/]);
+  let fth=0;
+  const students=rows.map(row=>{const c=String(row[cC]||'').trim(),n=String(row[nC]||'').trim(),nm=String(row[nmC]||'').trim(),att=parseFloat(row[aC])||0;
+    let th=0;if(tC){const tv=String(row[tC]||''),tm=tv.match(/(\d+)/);if(tm)th=parseInt(tm[1])}
+    if(th>fth)fth=th;return{class:c,num:n,name:nm,attend:att,totalHours:th}}).filter(s=>s.class&&s.num&&s.name);
+  return{students,fileTotalHours:fth}}
 
 /* ═══ Render ═══ */
 function render(){
   const root=document.getElementById('root');
-  if(!API){root.innerHTML=setupPage();return}
-  let h=header();
+  if(!API){root.innerHTML=`<div class="setup-page"><h2>🔗 서버 연결</h2><p>관리자에게 받은 연결 URL을 붙여넣으세요.</p><input class="url-input" id="sUrl" placeholder="https://script.google.com/macros/s/..."><button class="btn btn-success" style="width:100%;justify-content:center;padding:12px" onclick="saveApi()">연결하기</button></div>`;return}
+  let h=`<div class="header"><div><h1><span class="icon">👩‍🏫</span> 최성보 교사용</h1>
+    <div style="font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px">과목 선택 → 파일 업로드 → 대상자 판별
+    <span class="conn ${connected?'conn-ok':'conn-fail'}">● ${connected?'연결됨':'끊김'}</span></div></div>
+    <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙</button></div></div>`;
+  if(selId){h+=`<div class="nav">${[{id:'main',l:'파일 업로드 & 분석'},{id:'manage',l:'데이터 관리'}].map(p=>`<button class="${tab===p.id?'active':''}" onclick="tab='${p.id}';render()">${p.l}</button>`).join('')}</div>`}
   h+=`<div class="container">${loading?'<div class="loading">불러오는 중</div>':mainPage()}</div>`;
-  root.innerHTML=h;
-}
-
-function header(){
-  return`<div class="header"><div><h1><span class="icon">👩‍🏫</span> 최성보 교사용</h1>
-  <div style="font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px">과목 선택 → 파일 업로드 → 대상자 판별
-  <span class="conn ${connected?'conn-ok':'conn-fail'}">● ${connected?'연결됨':'끊김'}</span></div></div>
-  <div class="btn-group"><button class="btn btn-outline btn-sm" onclick="loadData()">🔄 새로고침</button><button class="btn btn-outline btn-sm" onclick="chgApi()">⚙ 연결</button></div></div>`;
-}
-
-function setupPage(){
-  return`<div class="setup-page"><h2>🔗 서버 연결</h2>
-  <p>관리자에게 받은 연결 URL을 붙여넣으세요.</p>
-  <input class="url-input" id="sUrl" placeholder="https://script.google.com/macros/s/...">
-  <button class="btn btn-success" style="width:100%;justify-content:center;padding:12px" onclick="saveApi()">연결하기</button></div>`;
-}
+  root.innerHTML=h}
 
 function mainPage(){
   const ss=subjs();
-  if(!ss.length)return`<div class="card empty"><p style="font-size:15px;margin-bottom:8px">등록된 과목이 없습니다</p><p>관리자가 과목을 등록하면 여기에 나타납니다. 새로고침을 눌러보세요.</p></div>`;
-
+  if(!ss.length)return`<div class="card empty"><p style="font-size:15px;margin-bottom:8px">등록된 과목이 없습니다</p><p>관리자가 과목을 등록하면 나타납니다.</p></div>`;
   let h=`<div class="card"><div class="form-grid"><div class="form-group"><label>과목 선택</label>
     <select onchange="selectSubj(this.value)"><option value="">— 과목을 선택하세요 —</option>
-    ${ss.map(s=>`<option value="${s.id}" ${selId===s.id?'selected':''}>${esc(s.name)} (${esc(s.teacher||'미지정')})</option>`).join('')}
+    ${ss.map(s=>`<option value="${s.id}" ${selId===s.id?'selected':''}>${esc(s.name)} (${esc(s.teacher||'미지정')}) [${(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결'}]</option>`).join('')}
     </select></div></div></div>`;
-
-  if(!selId)return h+`<div class="card empty">과목을 선택하면 설정 영역이 나타납니다</div>`;
+  if(!selId)return h+`<div class="card empty">과목을 선택하세요</div>`;
   const subj=ss.find(s=>s.id===selId);if(!subj)return h;
+  if(tab==='manage')return h+managePage(subj);
+  return h+uploadPage(subj)}
+
+/* ─── Upload Page ─── */
+function uploadPage(subj){
+  const ib=(subj.evalType||'both')!=='attendanceOnly';
   const hasCfg=!!getCfg(selId);const r=getRes(selId);const hasRes=r?.students?.length>0;
+  const totalGradeStudents=gradeFiles.reduce((a,f)=>a+f.students.length,0);
+  const totalAttendStudents=attendFiles.reduce((a,f)=>a+f.students.length,0);
 
-  h+=`<div class="step">
-    <span class="step-n ${hasCfg?'step-done':'step-act'}">1</span><span style="font-size:13px;font-weight:600">설정 & 업로드</span>
-    <span class="step-line"></span>
-    <span class="step-n ${hasRes?'step-done':'step-wait'}">2</span><span style="font-size:13px;font-weight:600">결과</span>
-  </div>`;
+  let h=`<div class="card"><div class="card-header"><span class="card-title">① 파일 업로드 — ${esc(subj.name)} <span class="badge ${ib?'badge-blue':'badge-green'}">${ib?'성적+출결':'출결만'}</span></span></div>`;
 
-  // Upload + Config combined
-  h+=uploadAndCfgSection(subj,hasCfg);
-
-  // Results
-  if(hasRes)h+=resultSection(subj,r);
-  return h;
-}
-
-/* ─── Upload + Config Section ─── */
-function uploadAndCfgSection(subj,hasCfg){
-  const ib=CFG.evalType==='both';
-  let h=`<div class="card">
-    <div class="card-header"><span class="card-title">① 파일 업로드 & 설정 — ${esc(subj.name)}</span></div>
-
-    <div class="form-grid" style="margin-bottom:16px">
-      <div class="form-group"><label>평가유형</label><select onchange="CFG.evalType=this.value;render()">
-        <option value="both" ${CFG.evalType==='both'?'selected':''}>성적 + 출결</option>
-        <option value="attendanceOnly" ${CFG.evalType==='attendanceOnly'?'selected':''}>출결만</option></select></div>
-      <div class="form-group"><label>수업시수 (총)</label><input type="number" value="${CFG.totalHours}" min="1" onchange="CFG.totalHours=Number(this.value)"></div>
-    </div>`;
-
-  // Grade file upload
+  // Grade files (multiple)
   if(ib){
-    h+=`<p style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px">📊 성적 파일 (나이스)
-      ${gradeData?`<span class="badge badge-green">${gradeData.students.length}명 · ${gradeData.assessments.length}개 평가영역</span>`:''}</p>
-    <div class="file-upload" style="margin-bottom:12px"><input type="file" accept=".xlsx,.xls,.csv" onchange="hGrade(this.files[0])">
-      <div style="font-size:22px;margin-bottom:4px">📊</div>
-      <div style="font-size:13px;color:var(--text2)">나이스 성적 일람표 엑셀 파일</div></div>`;
-
-    if(gradeData){
-      // Show auto-detected info
-      h+=`<div class="auto-msg">✅ 파일에서 자동 감지: ${gradeData.assessments.map(a=>`${a.name}(${a.ratio}%)`).join(', ')}${gradeData.meta.subject?` | 과목: ${gradeData.meta.subject}`:''}</div>`;
-
-      // Show config from detected data
-      h+=`<div style="margin-bottom:16px">
-        <div class="form-grid" style="margin-bottom:12px">
-          <div class="form-group"><label>분할점수 유형</label><select onchange="CFG.divisionType=this.value">
-            <option value="fixed" ${CFG.divisionType==='fixed'?'selected':''}>고정분할점수</option>
-            <option value="estimated" ${CFG.divisionType==='estimated'?'selected':''}>추정분할점수</option></select></div>
-          <div class="form-group"><label>성취도 기준점수 (환산 100점 만점 기준)</label><input type="number" value="${CFG.threshold}" min="0" max="100" onchange="CFG.threshold=Number(this.value)"></div>
-        </div>
-        <p style="font-size:13px;font-weight:700;margin-bottom:8px">평가영역 (파일에서 자동 설정됨 — 만점만 확인하세요)</p>`;
-
-      // Show exam1/exam2
-      if(CFG.exam1.enabled){
-        h+=`<div class="perf-row"><span style="min-width:80px;font-size:13px;font-weight:500">1차고사</span>
-          <span class="badge badge-blue">${CFG.exam1.ratio}%</span>
-          <span style="font-size:12px;color:var(--text2)">만점:</span>
-          <input type="number" value="${CFG.exam1.max}" min="1" style="width:70px" onchange="CFG.exam1.max=Number(this.value)"></div>`;
-      }
-      if(CFG.exam2.enabled){
-        h+=`<div class="perf-row"><span style="min-width:80px;font-size:13px;font-weight:500">2차고사</span>
-          <span class="badge badge-blue">${CFG.exam2.ratio}%</span>
-          <span style="font-size:12px;color:var(--text2)">만점:</span>
-          <input type="number" value="${CFG.exam2.max}" min="1" style="width:70px" onchange="CFG.exam2.max=Number(this.value)"></div>`;
-      }
-      CFG.perfs.forEach((p,i)=>{
-        h+=`<div class="perf-row"><span style="min-width:80px;font-size:13px;font-weight:500">${esc(p.name.length>15?p.name.substring(0,15)+'…':p.name)}</span>
-          <span class="badge badge-green">${p.ratio}%</span>
-          <span style="font-size:12px;color:var(--text2)">만점:</span>
-          <input type="number" value="${p.max}" min="1" style="width:70px" onchange="CFG.perfs[${i}].max=Number(this.value)"></div>`;
+    h+=`<p style="font-size:13px;font-weight:600;margin-bottom:8px">📊 성적 파일 (반별로 여러 개 업로드 가능) ${totalGradeStudents?`<span class="badge badge-green">총 ${totalGradeStudents}명</span>`:''}</p>
+    <div class="file-upload" style="margin-bottom:8px"><input type="file" accept=".xlsx,.xls" multiple onchange="hGradeMulti(this.files)">
+      <div style="font-size:20px">📊</div><div style="font-size:13px;color:var(--text2)">나이스 성적 일람표 (여러 파일 선택 가능)</div></div>`;
+    if(gradeFiles.length){
+      h+=`<div class="file-list">`;
+      gradeFiles.forEach((f,i)=>{
+        h+=`<div class="file-item"><span>📄 ${esc(f.name)} — ${f.students.length}명${f.meta?.dept?' ('+f.meta.dept+')':''}</span>
+          <button class="btn-x" onclick="gradeFiles.splice(${i},1);render()" title="제거">✕</button></div>`;
       });
       h+=`</div>`;
-
-      // Preview
-      h+=`<details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;color:var(--text2)">성적 데이터 미리보기 (상위 5명)</summary>
-        <div style="overflow-x:auto;margin-top:6px"><table class="preview-tbl"><thead><tr><th>반</th><th>번호</th><th>성명</th>`;
-      gradeData.assessments.forEach(a=>{h+=`<th>${esc(a.name.length>10?a.name.substring(0,10)+'…':a.name)}</th>`});
-      h+=`</tr></thead><tbody>`;
-      gradeData.students.slice(0,5).forEach(s=>{
-        h+=`<tr><td>${s.class}</td><td>${s.num}</td><td>${esc(s.name)}</td>`;
-        s.scores.forEach(sc=>{h+=`<td>${sc}</td>`});
-        h+=`</tr>`;
-      });
-      h+=`</tbody></table></div></details>`;
+      // Show auto-detected assessments from first file
+      const as=gradeFiles[0].assessments;
+      if(as.length)h+=`<div class="auto-msg">✅ 평가영역 자동감지: ${as.map(a=>`${a.name}(${a.ratio}%)`).join(', ')}</div>`;
+      // Config
+      h+=cfgSection();
     }
   }
 
-  // Attend file
-  h+=`<p style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px">📋 출결 파일 (나이스)
-    ${attendData?`<span class="badge badge-green">${attendData.students.length}명</span>`:''}</p>
-  <div class="file-upload"><input type="file" accept=".xlsx,.xls,.csv" onchange="hAttend(this.files[0])">
-    <div style="font-size:22px;margin-bottom:4px">📋</div>
-    <div style="font-size:13px;color:var(--text2)">나이스 과목별출결현황 엑셀 파일</div></div>`;
-
-  if(attendData){
-    h+=`<div class="auto-msg">✅ 출결 데이터 ${attendData.students.length}명${attendData.fileTotalHours?` | 파일 수업시수: ${attendData.fileTotalHours}시간`:''}</div>`;
+  // Attend files (multiple)
+  h+=`<hr class="sep"><p style="font-size:13px;font-weight:600;margin-bottom:8px">📋 출결 파일 (반별로 여러 개 업로드 가능) ${totalAttendStudents?`<span class="badge badge-green">총 ${totalAttendStudents}명</span>`:''}</p>
+  <div class="file-upload" style="margin-bottom:8px"><input type="file" accept=".xlsx,.xls" multiple onchange="hAttendMulti(this.files)">
+    <div style="font-size:20px">📋</div><div style="font-size:13px;color:var(--text2)">나이스 과목별출결현황 (여러 파일 선택 가능)</div></div>`;
+  if(attendFiles.length){
+    h+=`<div class="file-list">`;
+    attendFiles.forEach((f,i)=>{
+      h+=`<div class="file-item"><span>📄 ${esc(f.name)} — ${f.students.length}명</span>
+        <button class="btn-x" onclick="attendFiles.splice(${i},1);render()" title="제거">✕</button></div>`;
+    });
+    h+=`</div>`;
+    if(totalHoursFromFile)h+=`<div class="auto-msg">✅ 수업시수: ${totalHoursFromFile}시간 (파일에서 감지)</div>`;
   }
 
   // Run button
-  const canRun=(ib&&gradeData&&gradeData.students.length>0)||(!ib&&attendData&&attendData.students.length>0)||(ib&&gradeData&&attendData);
+  const canRun=(ib&&totalGradeStudents>0)||(!ib&&totalAttendStudents>0)||(ib&&totalGradeStudents>0&&totalAttendStudents>0);
   if(canRun){
     h+=`<div style="text-align:center;margin-top:20px">
-      <button class="btn btn-primary btn-big" onclick="runCalc()">🔍 대상자 판별 실행 & 서버 저장</button>
-    </div>`;
+      <button class="btn btn-primary btn-big" onclick="runCalc()">🔍 대상자 판별 실행 & 서버 저장</button></div>`;
   }
   h+=`</div>`;
-  return h;
-}
+
+  // Results
+  if(hasRes)h+=resultSection(subj,r);
+  return h}
+
+function cfgSection(){
+  let h=`<div style="margin:12px 0;padding:12px 16px;background:#f8fafc;border-radius:8px">
+    <p style="font-size:13px;font-weight:700;margin-bottom:8px">성적 설정</p>
+    <div class="form-grid" style="margin-bottom:10px">
+      <div class="form-group"><label>분할점수 유형</label><select onchange="CFG.divisionType=this.value">
+        <option value="fixed" ${CFG.divisionType==='fixed'?'selected':''}>고정분할점수</option>
+        <option value="estimated" ${CFG.divisionType==='estimated'?'selected':''}>추정분할점수</option></select></div>
+      <div class="form-group"><label>성취도 기준점수 (환산 100점 만점)</label><input type="number" value="${CFG.threshold}" min="0" max="100" onchange="CFG.threshold=Number(this.value)"></div>
+    </div>
+    <p style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text2)">평가영역 만점 확인 (반영비율은 파일에서 자동설정)</p>`;
+  if(CFG.exam1.enabled)h+=`<div class="perf-row"><span style="min-width:70px;font-size:12px">1차고사</span><span class="badge badge-blue">${CFG.exam1.ratio}%</span><span style="font-size:11px;color:var(--text3)">만점:</span><input type="number" value="${CFG.exam1.max}" min="1" style="width:60px;font-size:12px;padding:4px 6px" onchange="CFG.exam1.max=Number(this.value)"></div>`;
+  if(CFG.exam2.enabled)h+=`<div class="perf-row"><span style="min-width:70px;font-size:12px">2차고사</span><span class="badge badge-blue">${CFG.exam2.ratio}%</span><span style="font-size:11px;color:var(--text3)">만점:</span><input type="number" value="${CFG.exam2.max}" min="1" style="width:60px;font-size:12px;padding:4px 6px" onchange="CFG.exam2.max=Number(this.value)"></div>`;
+  CFG.perfs.forEach((p,i)=>{
+    h+=`<div class="perf-row"><span style="min-width:70px;font-size:12px">${esc(p.name.length>12?p.name.substring(0,12)+'…':p.name)}</span><span class="badge badge-green">${p.ratio}%</span><span style="font-size:11px;color:var(--text3)">만점:</span><input type="number" value="${p.max}" min="1" style="width:60px;font-size:12px;padding:4px 6px" onchange="CFG.perfs[${i}].max=Number(this.value)"></div>`;
+  });
+  h+=`</div>`;return h}
 
 /* ─── File Handlers ─── */
-async function hGrade(f){
-  if(!f)return;
-  try{
-    const buf=await f.arrayBuffer();
-    gradeData=parseNEISGrade(buf);
-    
-    if(gradeData.students.length===0){toast('학생 데이터를 찾지 못했습니다');return}
-
-    // Auto-fill config from detected assessments
-    const as=gradeData.assessments;
-    const exams=as.filter(a=>/고사|지필|시험/.test(a.name));
-    const perfs=as.filter(a=>!/고사|지필|시험/.test(a.name));
-
-    CFG.exam1={enabled:false,ratio:0,max:100};
-    CFG.exam2={enabled:false,ratio:0,max:100};
-    
-    if(exams.length>=1){CFG.exam1={enabled:true,ratio:exams[0].ratio,max:100}}
-    if(exams.length>=2){CFG.exam2={enabled:true,ratio:exams[1].ratio,max:100}}
-    
+async function hGradeMulti(files){
+  for(const f of files){try{const buf=await f.arrayBuffer();const d=parseNEISGrade(buf);
+    if(d.students.length===0){toast(`${f.name}: 학생 없음`);continue}
+    d.name=f.name;gradeFiles.push(d);
+  }catch(e){toast(`${f.name}: 오류`)}}
+  // Auto-fill config from first file's assessments
+  if(gradeFiles.length){
+    const as=gradeFiles[0].assessments;const exams=as.filter(a=>/고사|지필|시험/.test(a.name));const perfs=as.filter(a=>!/고사|지필|시험/.test(a.name));
+    CFG.exam1={enabled:false,ratio:0,max:100};CFG.exam2={enabled:false,ratio:0,max:100};
+    if(exams.length>=1)CFG.exam1={enabled:true,ratio:exams[0].ratio,max:100};
+    if(exams.length>=2)CFG.exam2={enabled:true,ratio:exams[1].ratio,max:100};
     CFG.perfs=perfs.map(p=>({id:gid(),name:p.name,ratio:p.ratio,max:100}));
-    if(CFG.perfs.length===0&&exams.length===0){
-      // All items are assessments
-      CFG.exam1={enabled:false,ratio:0,max:100};
-      CFG.exam2={enabled:false,ratio:0,max:100};
-      CFG.perfs=as.map(a=>({id:gid(),name:a.name,ratio:a.ratio,max:100}));
-    }
+    if(!CFG.perfs.length&&!exams.length)CFG.perfs=as.map(a=>({id:gid(),name:a.name,ratio:a.ratio,max:100}));
+  }
+  toast(`성적 파일 ${gradeFiles.length}개, 총 ${gradeFiles.reduce((a,f)=>a+f.students.length,0)}명`);render()}
 
-    toast(`성적 파일: ${gradeData.students.length}명, ${as.length}개 영역 감지`);
-    render();
-  }catch(e){toast('파일 읽기 오류: '+e.message);console.error(e)}
-}
-
-async function hAttend(f){
-  if(!f)return;
-  try{
-    const buf=await f.arrayBuffer();
-    attendData=parseNEISAttend(buf);
-    if(attendData.students.length===0){toast('학생 데이터를 찾지 못했습니다');return}
-    // Auto-set totalHours if detected
-    if(attendData.fileTotalHours&&attendData.fileTotalHours>0){
-      CFG.totalHours=attendData.fileTotalHours;
-    }
-    toast(`출결 파일: ${attendData.students.length}명`);
-    render();
-  }catch(e){toast('파일 읽기 오류: '+e.message);console.error(e)}
-}
+async function hAttendMulti(files){
+  for(const f of files){try{const buf=await f.arrayBuffer();const d=parseNEISAttend(buf);
+    if(d.students.length===0){toast(`${f.name}: 학생 없음`);continue}
+    d.name=f.name;attendFiles.push(d);
+    if(d.fileTotalHours>totalHoursFromFile)totalHoursFromFile=d.fileTotalHours;
+  }catch(e){toast(`${f.name}: 오류`)}}
+  toast(`출결 파일 ${attendFiles.length}개, 총 ${attendFiles.reduce((a,f)=>a+f.students.length,0)}명`);render()}
 
 /* ─── Calculation ─── */
 async function runCalc(){
   readCfgDOM();
-  const ib=CFG.evalType==='both';
-
-  // Validate
-  if(ib){
-    let t=(CFG.exam1.enabled?CFG.exam1.ratio:0)+(CFG.exam2.enabled?CFG.exam2.ratio:0);
-    CFG.perfs.forEach(p=>t+=p.ratio);
-    if(t!==100)return toast(`반영비율 합계가 ${t}%입니다 (100% 필요)`);
-  }
-
-  // Save config first
-  const cfgCopy=JSON.parse(JSON.stringify(CFG));
-  D['config_'+selId]=cfgCopy;
-  await apiSave('config_'+selId,cfgCopy);
+  const subj=subjs().find(s=>s.id===selId);if(!subj)return;
+  const ib=(subj.evalType||'both')!=='attendanceOnly';
+  if(ib){let t=(CFG.exam1.enabled?CFG.exam1.ratio:0)+(CFG.exam2.enabled?CFG.exam2.ratio:0);CFG.perfs.forEach(p=>t+=p.ratio);
+    if(t!==100)return toast(`반영비율 합계 ${t}% (100% 필요)`)}
+  const cfgCopy=JSON.parse(JSON.stringify(CFG));D['config_'+selId]=cfgCopy;await apiSave('config_'+selId,cfgCopy);
 
   const sm={};
-  const prev=getRes(selId),pm={};
-  if(prev?.students)prev.students.forEach(s=>{pm[s.class+'-'+s.num]=s});
+  const prev=getRes(selId),pm={};if(prev?.students)prev.students.forEach(s=>{pm[s.class+'-'+s.num]=s});
 
-  // Grade data
-  if(ib&&gradeData){
-    const as=gradeData.assessments;
-    gradeData.students.forEach(s=>{
-      const k=s.class+'-'+s.num;
-      let cv=0;const scores={};
-      // Map assessments to config
-      let examIdx=0,perfIdx=0;
-      as.forEach((a,i)=>{
-        const val=s.scores[i]||0;
-        if(/고사|지필|시험/.test(a.name)){
-          if(examIdx===0&&CFG.exam1.enabled){scores.exam1=val;cv+=(val/CFG.exam1.max)*CFG.exam1.ratio;examIdx++}
-          else if(examIdx===1&&CFG.exam2.enabled){scores.exam2=val;cv+=(val/CFG.exam2.max)*CFG.exam2.ratio;examIdx++}
-        }else{
-          if(perfIdx<CFG.perfs.length){
-            if(!scores.perfs)scores.perfs=[];
-            scores.perfs.push(val);
-            cv+=(val/CFG.perfs[perfIdx].max)*CFG.perfs[perfIdx].ratio;
-            perfIdx++;
-          }
-        }
-      });
-      // If no exam/perf distinction worked, just map sequentially
-      if(!scores.exam1&&!scores.perfs){
-        scores.perfs=[];
-        let ci=0;
+  // Merge all grade files
+  if(ib){
+    const allAs=gradeFiles.length?gradeFiles[0].assessments:[];
+    gradeFiles.forEach(gf=>{gf.students.forEach(s=>{
+      const k=s.class+'-'+s.num;let cv=0;const scores={};
+      let ei=0,pi=0;
+      allAs.forEach((a,i)=>{const val=s.scores[i]||0;
+        if(/고사|지필|시험/.test(a.name)){if(ei===0&&CFG.exam1.enabled){scores.exam1=val;cv+=(val/CFG.exam1.max)*CFG.exam1.ratio;ei++}
+          else if(ei===1&&CFG.exam2.enabled){scores.exam2=val;cv+=(val/CFG.exam2.max)*CFG.exam2.ratio;ei++}}
+        else{if(pi<CFG.perfs.length){if(!scores.perfs)scores.perfs=[];scores.perfs.push(val);cv+=(val/CFG.perfs[pi].max)*CFG.perfs[pi].ratio;pi++}}});
+      if(!scores.exam1&&!scores.perfs){scores.perfs=[];let ci=0;
         if(CFG.exam1.enabled&&ci<s.scores.length){scores.exam1=s.scores[ci];cv+=(s.scores[ci]/CFG.exam1.max)*CFG.exam1.ratio;ci++}
         if(CFG.exam2.enabled&&ci<s.scores.length){scores.exam2=s.scores[ci];cv+=(s.scores[ci]/CFG.exam2.max)*CFG.exam2.ratio;ci++}
-        CFG.perfs.forEach(pf=>{if(ci<s.scores.length){scores.perfs.push(s.scores[ci]);cv+=(s.scores[ci]/pf.max)*pf.ratio;ci++}});
-      }
-      cv=Math.round(cv*100)/100;
-      sm[k]={class:s.class,num:s.num,name:s.name,scores,converted:cv,gradeTarget:cv<CFG.threshold};
-    });
+        CFG.perfs.forEach(pf=>{if(ci<s.scores.length){scores.perfs.push(s.scores[ci]);cv+=(s.scores[ci]/pf.max)*pf.ratio;ci++}})}
+      cv=Math.round(cv*100)/100;sm[k]={class:s.class,num:s.num,name:s.name,scores,converted:cv,gradeTarget:cv<CFG.threshold}})});
   }
 
-  // Attend data
-  if(attendData){
-    const th=Math.ceil(CFG.totalHours*(2/3));
-    attendData.students.forEach(s=>{
-      const k=s.class+'-'+s.num;
-      const at=s.attend<th;
-      if(sm[k]){sm[k].attend=s.attend;sm[k].attendTarget=at;sm[k].threshold23=th}
-      else sm[k]={class:s.class,num:s.num,name:s.name,scores:{},converted:null,gradeTarget:false,attend:s.attend,attendTarget:at,threshold23:th};
-    });
-  }
+  // Merge all attend files
+  const th23=totalHoursFromFile?Math.ceil(totalHoursFromFile*(2/3)):0;
+  attendFiles.forEach(af=>{af.students.forEach(s=>{
+    const k=s.class+'-'+s.num;const fileThresh=s.totalHours?Math.ceil(s.totalHours*(2/3)):th23;
+    const at=fileThresh>0?s.attend<fileThresh:false;
+    if(sm[k]){sm[k].attend=s.attend;sm[k].attendTarget=at;sm[k].threshold23=fileThresh||th23}
+    else sm[k]={class:s.class,num:s.num,name:s.name,scores:{},converted:null,gradeTarget:false,attend:s.attend,attendTarget:at,threshold23:fileThresh||th23}})});
 
   const students=Object.values(sm).map(s=>{
-    const th=s.threshold23??Math.ceil(CFG.totalHours*(2/3));
     const isMidal=ib?(s.gradeTarget||(s.attendTarget??false)):(s.attendTarget??false);
     const reasons=[];if(ib&&s.gradeTarget)reasons.push('성적');if(s.attendTarget)reasons.push('출결');
-    const p=pm[s.class+'-'+s.num];const pd=isMidal?(p?.preventionDone??false):false;
-    return{...s,threshold23:th,isMidal,reasons,preventionDone:pd,isTarget:isMidal&&!pd};
+    const p=pm[s.class+'-'+s.num];
+    const status=p?.status||'재학';  // 재학/위탁/자퇴
+    const pd=isMidal?(p?.preventionDone??false):false;
+    const isExcluded=status==='자퇴';
+    const isExempt=status==='위탁'||pd;
+    return{...s,isMidal,reasons,preventionDone:pd,status,isTarget:!isExcluded&&!isExempt&&isMidal};
   });
   students.sort((a,b)=>a.class!==b.class?a.class.localeCompare(b.class,'ko'):parseInt(a.num)-parseInt(b.num));
 
-  const result={students,updatedAt:new Date().toISOString()};
-  D['results_'+selId]=result;
-  render();
+  const result={students,updatedAt:new Date().toISOString()};D['results_'+selId]=result;render();
   await apiSave('results_'+selId,result);
-  toast(`${students.length}명 분석 완료 · 대상자 ${students.filter(s=>s.isTarget).length}명 · 서버 저장 ✓`);
-}
+  const active=students.filter(s=>s.status!=='자퇴');
+  toast(`${active.length}명 분석 · 대상자 ${students.filter(s=>s.isTarget).length}명 · 저장 ✓`)}
 
 function readCfgDOM(){
-  document.querySelectorAll('[onchange*="CFG.totalHours"]').forEach(el=>{CFG.totalHours=Number(el.value)||68});
   document.querySelectorAll('[onchange*="CFG.threshold"]').forEach(el=>{CFG.threshold=Number(el.value)||40});
   document.querySelectorAll('[onchange*="CFG.divisionType"]').forEach(el=>{CFG.divisionType=el.value});
   document.querySelectorAll('[onchange*="CFG.exam1.max"]').forEach(el=>{CFG.exam1.max=Number(el.value)||100});
   document.querySelectorAll('[onchange*="CFG.exam2.max"]').forEach(el=>{CFG.exam2.max=Number(el.value)||100});
-  CFG.perfs.forEach((p,i)=>{
-    document.querySelectorAll(`[onchange*="CFG.perfs[${i}].max"]`).forEach(el=>{p.max=Number(el.value)||100});
-  });
-}
+  CFG.perfs.forEach((p,i)=>{document.querySelectorAll(`[onchange*="CFG.perfs[${i}].max"]`).forEach(el=>{p.max=Number(el.value)||100})})}
 
 /* ─── Results ─── */
 function resultSection(subj,r){
-  const c=getCfg(selId),ib=c?.evalType==='both',stu=r.students;
+  const c=getCfg(selId),ib=(subj.evalType||'both')!=='attendanceOnly';
+  const stu=r.students.filter(s=>s.status!=='자퇴');
+  const allStu=r.students;
   const cls=[...new Set(stu.map(s=>s.class))].sort((a,b)=>a.localeCompare(b,'ko'));
   const fl=stu.filter(s=>{if(clsFilt&&s.class!==clsFilt)return false;if(onlyMidal&&!s.isMidal)return false;return true});
   const tot=stu.length,midN=stu.filter(s=>s.isMidal).length,tgtN=stu.filter(s=>s.isTarget).length;
+  const witN=stu.filter(s=>s.status==='위탁').length;
+  const dropN=allStu.filter(s=>s.status==='자퇴').length;
 
   let h=`<div class="card"><div class="card-header"><span class="card-title">② 분석 결과</span>
-    <button class="btn btn-success btn-sm" onclick="expXL()">📥 엑셀 내보내기</button></div>
+    <button class="btn btn-success btn-sm" onclick="expXL()">📥 엑셀</button></div>
     <div class="stats">
-      <div class="stat-card"><div class="num">${tot}</div><div class="lb">전체</div></div>
+      <div class="stat-card"><div class="num">${tot}</div><div class="lb">재학생</div></div>
       <div class="stat-card"><div class="num" style="color:var(--amber)">${midN}</div><div class="lb">미달</div></div>
       <div class="stat-card hl"><div class="num">${tgtN}</div><div class="lb">최종 대상자</div></div>
+      ${witN?`<div class="stat-card"><div class="num" style="color:var(--text3)">${witN}</div><div class="lb">위탁(제외)</div></div>`:''}
+      ${dropN?`<div class="stat-card"><div class="num" style="color:var(--text3)">${dropN}</div><div class="lb">자퇴</div></div>`:''}
     </div>
     <div class="filter-bar">
       <div class="form-group" style="min-width:100px"><label>반</label><select onchange="clsFilt=this.value;render()"><option value="">전체</option>${cls.map(c=>`<option value="${c}" ${clsFilt===c?'selected':''}>${c}반</option>`).join('')}</select></div>
-      <label class="check-row" style="padding-bottom:4px"><input type="checkbox" ${onlyMidal?'checked':''} onchange="onlyMidal=this.checked;render()"><span style="font-size:13px">미달자만</span></label>
+      <label style="display:flex;align-items:center;gap:6px;padding-bottom:4px;font-size:13px"><input type="checkbox" ${onlyMidal?'checked':''} onchange="onlyMidal=this.checked;render()" style="width:15px;height:15px">미달자만</label>
     </div>
     <div class="table-wrap"><table><thead><tr><th>반</th><th>번호</th><th>성명</th>`;
   if(ib){
-    if(c.exam1?.enabled)h+=`<th class="tr">1차</th>`;
-    if(c.exam2?.enabled)h+=`<th class="tr">2차</th>`;
-    if(c.perfs)c.perfs.forEach(p=>{h+=`<th class="tr">${esc(p.name.length>8?p.name.substring(0,8)+'…':p.name)}</th>`});
+    if(c?.exam1?.enabled)h+=`<th class="tr">1차</th>`;
+    if(c?.exam2?.enabled)h+=`<th class="tr">2차</th>`;
+    if(c?.perfs)c.perfs.forEach(p=>{h+=`<th class="tr">${esc(p.name.length>6?p.name.substring(0,6)+'…':p.name)}</th>`});
     h+=`<th class="tr">환산</th><th class="tc">성적</th>`;
   }
-  h+=`<th class="tr">출석</th><th class="tc">출결</th><th class="tc">예방지도</th><th class="tc">최종</th></tr></thead><tbody>`;
+  h+=`<th class="tr">출석</th><th class="tc">출결</th><th class="tc">상태</th><th class="tc">최종</th><th></th></tr></thead><tbody>`;
 
   fl.forEach(s=>{
-    h+=`<tr class="${s.isTarget?'row-target':''}"><td>${esc(s.class)}</td><td>${s.num}</td><td style="font-weight:500">${esc(s.name)}</td>`;
+    const dim=s.status==='위탁';
+    h+=`<tr class="${s.isTarget?'row-target':''} ${dim?'row-dim':''}"><td>${esc(s.class)}</td><td>${s.num}</td><td style="font-weight:500">${esc(s.name)}</td>`;
     if(ib){
-      if(c.exam1?.enabled)h+=`<td class="tr">${s.scores?.exam1??'—'}</td>`;
-      if(c.exam2?.enabled)h+=`<td class="tr">${s.scores?.exam2??'—'}</td>`;
-      if(c.perfs)c.perfs.forEach((_,i)=>{h+=`<td class="tr">${s.scores?.perfs?.[i]??'—'}</td>`});
+      if(c?.exam1?.enabled)h+=`<td class="tr">${s.scores?.exam1??'—'}</td>`;
+      if(c?.exam2?.enabled)h+=`<td class="tr">${s.scores?.exam2??'—'}</td>`;
+      if(c?.perfs)c.perfs.forEach((_,i)=>{h+=`<td class="tr">${s.scores?.perfs?.[i]??'—'}</td>`});
       h+=`<td class="tr" style="font-weight:700;${s.gradeTarget?'color:var(--red)':''}">${s.converted??'—'}</td>`;
       h+=`<td class="tc">${s.converted!=null?(s.gradeTarget?'<span class="badge badge-red">미달</span>':'<span class="badge badge-green">도달</span>'):''}</td>`;
     }
     h+=`<td class="tr">${s.attend!=null?s.attend+'/'+s.threshold23:'—'}</td>`;
     h+=`<td class="tc">${s.attend!=null?(s.attendTarget?'<span class="badge badge-red">미달</span>':'<span class="badge badge-green">충족</span>'):''}</td>`;
-    if(s.isMidal){h+=`<td class="tc"><select class="isel" onchange="togPrev('${s.class}','${s.num}',this.value)"><option value="n" ${!s.preventionDone?'selected':''}>미이수</option><option value="y" ${s.preventionDone?'selected':''}>이수</option></select></td>`}
-    else{h+=`<td class="tc" style="color:var(--text3)">—</td>`}
-    h+=`<td class="tc">${s.isTarget?'<span class="badge badge-target">대상자</span>':'<span style="color:var(--text3)">—</span>'}</td></tr>`;
+    // Status dropdown: 재학/위탁/예방지도이수
+    if(s.isMidal){
+      const val=s.status==='위탁'?'위탁':(s.preventionDone?'이수':'미이수');
+      h+=`<td class="tc"><select class="isel" onchange="chgStatus('${s.class}','${s.num}',this.value)">
+        <option value="미이수" ${val==='미이수'?'selected':''}>미이수</option>
+        <option value="이수" ${val==='이수'?'selected':''}>이수</option>
+        <option value="위탁" ${val==='위탁'?'selected':''}>위탁(제외)</option></select></td>`;
+    }else{
+      h+=`<td class="tc">${s.status==='위탁'?'<span class="badge badge-slate">위탁</span>':'<span style="color:var(--text3)">—</span>'}</td>`;
+    }
+    h+=`<td class="tc">${s.isTarget?'<span class="badge badge-target">대상자</span>':'<span style="color:var(--text3)">—</span>'}</td>`;
+    h+=`<td class="tc"><button class="btn-x" onclick="dropStudent('${s.class}','${s.num}')" title="자퇴 처리 (결과에서 제거)">✕</button></td>`;
+    h+=`</tr>`;
   });
-  h+=`</tbody></table></div></div>`;return h;
-}
+  h+=`</tbody></table></div></div>`;return h}
 
-async function togPrev(cls,num,v){
+async function chgStatus(cls,num,val){
   const r=getRes(selId);if(!r?.students)return;
   const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
-  s.preventionDone=(v==='y');s.isTarget=s.isMidal&&!s.preventionDone;
-  D['results_'+selId]=r;render();
-  await apiSave('results_'+selId,r);
-  toast(s.preventionDone?`${s.name} 이수 처리 → 대상 제외`:`${s.name} 미이수 → 대상자`);
-}
+  if(val==='위탁'){s.status='위탁';s.preventionDone=false;s.isTarget=false}
+  else if(val==='이수'){s.status='재학';s.preventionDone=true;s.isTarget=false}
+  else{s.status='재학';s.preventionDone=false;s.isTarget=s.isMidal}
+  D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name}: ${val}`)}
 
-function selectSubj(id){selId=id;clsFilt='';onlyMidal=false;gradeData=null;attendData=null;if(id)loadCfg(id);render()}
+async function dropStudent(cls,num){
+  const r=getRes(selId);if(!r?.students)return;
+  const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
+  if(!confirm(`${s.name} (${cls}반 ${num}번)을 자퇴 처리하시겠습니까?\n결과에서 숨겨지며, 데이터 관리 탭에서 복구할 수 있습니다.`))return;
+  s.status='자퇴';s.isTarget=false;
+  D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name} 자퇴 처리`)}
+
+/* ─── Manage Page ─── */
+function managePage(subj){
+  const r=getRes(selId);
+  const dropped=r?.students?.filter(s=>s.status==='자퇴')||[];
+  let h=`<div class="card"><div class="card-header"><span class="card-title">데이터 관리 — ${esc(subj.name)}</span></div>
+
+    <p style="font-size:13px;font-weight:600;margin-bottom:12px">업로드 데이터 초기화</p>
+    <div class="btn-group" style="margin-bottom:20px">
+      <button class="btn btn-danger" onclick="clearGrade()">성적 파일 초기화</button>
+      <button class="btn btn-danger" onclick="clearAttend()">출결 파일 초기화</button>
+      <button class="btn btn-danger" onclick="clearResults()">분석 결과 삭제 (서버)</button>
+    </div>
+
+    <hr class="sep">
+    <p style="font-size:13px;font-weight:600;margin-bottom:12px">자퇴 처리된 학생 (${dropped.length}명)</p>`;
+  if(!dropped.length)h+=`<p style="font-size:12px;color:var(--text3)">자퇴 처리된 학생이 없습니다</p>`;
+  else{
+    h+=`<div class="table-wrap"><table><thead><tr><th>반</th><th>번호</th><th>성명</th><th class="tc">복구</th></tr></thead><tbody>`;
+    dropped.forEach(s=>{
+      h+=`<tr><td>${esc(s.class)}</td><td>${s.num}</td><td>${esc(s.name)}</td>
+        <td class="tc"><button class="btn btn-outline btn-sm" onclick="restoreStudent('${s.class}','${s.num}')">복구</button></td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  }
+  h+=`</div>`;return h}
+
+function clearGrade(){gradeFiles=[];toast('성적 파일 초기화');render()}
+function clearAttend(){attendFiles=[];totalHoursFromFile=0;toast('출결 파일 초기화');render()}
+async function clearResults(){if(!confirm('서버의 분석 결과를 삭제하시겠습니까?'))return;
+  delete D['results_'+selId];delete D['config_'+selId];await apiDel('results_'+selId);await apiDel('config_'+selId);
+  toast('결과 삭제 완료');render()}
+
+async function restoreStudent(cls,num){
+  const r=getRes(selId);if(!r?.students)return;
+  const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
+  s.status='재학';s.isTarget=s.isMidal&&!s.preventionDone;
+  D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name} 복구`)}
+
+function selectSubj(id){selId=id;clsFilt='';onlyMidal=false;tab='main';gradeFiles=[];attendFiles=[];totalHoursFromFile=0;if(id)loadCfg(id);render()}
 function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
 function chgApi(){const u=prompt('연결 URL:',API);if(u===null)return;API=u.trim();localStorage.setItem('mast_api',API);if(API)loadData();else render()}
 
 function expXL(){
-  const subj=subjs().find(s=>s.id===selId),c=getCfg(selId),r=getRes(selId);if(!subj||!r?.students)return;const ib=c?.evalType==='both';
-  const rows=r.students.map(s=>{const row={'반':s.class,'번호':s.num,'성명':s.name};
-    if(ib){if(c.exam1?.enabled)row['1차']=s.scores?.exam1??'';if(c.exam2?.enabled)row['2차']=s.scores?.exam2??'';
-      if(c.perfs)c.perfs.forEach((pf,i)=>{row[pf.name]=s.scores?.perfs?.[i]??''});
-      row['환산점수']=s.converted;row['기준']=c.threshold;row['성적']=s.gradeTarget?'미달':'도달'}
+  const subj=subjs().find(s=>s.id===selId),c=getCfg(selId),r=getRes(selId);if(!subj||!r?.students)return;
+  const ib=(subj.evalType||'both')!=='attendanceOnly';
+  const rows=r.students.filter(s=>s.status!=='자퇴').map(s=>{const row={'반':s.class,'번호':s.num,'성명':s.name,'상태':s.status||'재학'};
+    if(ib){if(c?.exam1?.enabled)row['1차']=s.scores?.exam1??'';if(c?.exam2?.enabled)row['2차']=s.scores?.exam2??'';
+      if(c?.perfs)c.perfs.forEach((pf,i)=>{row[pf.name]=s.scores?.perfs?.[i]??''});
+      row['환산']=s.converted;row['기준']=c.threshold;row['성적']=s.gradeTarget?'미달':'도달'}
     row['출석']=s.attend??'';row['출석기준']=s.threshold23;row['출결']=s.attendTarget?'미달':(s.attend!=null?'충족':'');
-    row['예방지도']=s.preventionDone?'이수':(s.isMidal?'미이수':'');row['최종']=s.isTarget?'대상자':'';row['사유']=(s.reasons||[]).join(', ');return row});
+    row['예방지도']=s.preventionDone?'이수':(s.status==='위탁'?'위탁':(s.isMidal?'미이수':''));
+    row['최종']=s.isTarget?'대상자':'';row['사유']=(s.reasons||[]).join(', ');return row});
   const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,subj.name.substring(0,31));XLSX.writeFile(wb,`최성보_${subj.name}.xlsx`)}
 
