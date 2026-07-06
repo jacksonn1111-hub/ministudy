@@ -345,7 +345,7 @@ function readCfgDOM(){
 /* ─── Results ─── */
 function resultSection(subj,r){
   const c=getCfg(selId),ib=(subj.evalType||'both')!=='attendanceOnly';
-  const stu=r.students.filter(s=>s.status!=='자퇴');
+  const stu=r.students;
   const allStu=r.students;
   const cls=[...new Set(stu.map(s=>s.class))].sort((a,b)=>a.localeCompare(b,'ko'));
   const fl=stu.filter(s=>{if(clsFilt&&s.class!==clsFilt)return false;if(onlyMidal&&!s.isMidal)return false;return true});
@@ -359,8 +359,8 @@ function resultSection(subj,r){
       <div class="stat-card"><div class="num">${tot}</div><div class="lb">재학생</div></div>
       <div class="stat-card"><div class="num" style="color:var(--amber)">${midN}</div><div class="lb">미달</div></div>
       <div class="stat-card hl"><div class="num">${tgtN}</div><div class="lb">최종 대상자</div></div>
-      ${witN?`<div class="stat-card"><div class="num" style="color:var(--text3)">${witN}</div><div class="lb">위탁(제외)</div></div>`:''}
-      ${dropN?`<div class="stat-card"><div class="num" style="color:var(--text3)">${dropN}</div><div class="lb">자퇴</div></div>`:''}
+      ${prevN?`<div class="stat-card"><div class="num" style="color:var(--green)">${prevN}</div><div class="lb">예방지도이수</div></div>`:''}
+      ${witN+dropN+restN>0?`<div class="stat-card"><div class="num" style="color:var(--text3)">${witN+dropN+restN}</div><div class="lb">제외(자퇴·위탁·휴학)</div></div>`:''}
     </div>
     <div class="filter-bar">
       <div class="form-group" style="min-width:100px"><label>반</label><select onchange="clsFilt=this.value;render()"><option value="">전체</option>${cls.map(c=>`<option value="${c}" ${clsFilt===c?'selected':''}>${c}반</option>`).join('')}</select></div>
@@ -373,10 +373,10 @@ function resultSection(subj,r){
     if(c?.perfs)c.perfs.forEach(p=>{h+=`<th class="tr">${esc(p.name.length>6?p.name.substring(0,6)+'…':p.name)}</th>`});
     h+=`<th class="tr">환산</th><th class="tc">성적</th>`;
   }
-  h+=`<th class="tr">출석</th><th class="tc">출결</th><th class="tc">상태</th><th class="tc">최종</th><th></th></tr></thead><tbody>`;
+  h+=`<th class="tr">출석</th><th class="tc">출결</th><th class="tc">상태</th><th class="tc">최종</th></tr></thead><tbody>`;
 
   fl.forEach(s=>{
-    const dim=s.status==='위탁';
+    const st2=s.status||'재학';const dim=st2!=='재학';
     h+=`<tr class="${s.isTarget?'row-target':''} ${dim?'row-dim':''}"><td>${esc(s.class)}</td><td>${s.num}</td><td style="font-weight:500">${esc(s.name)}</td>`;
     if(ib){
       if(c?.exam1?.enabled)h+=`<td class="tr">${s.scores?.exam1??'—'}</td>`;
@@ -388,17 +388,18 @@ function resultSection(subj,r){
     h+=`<td class="tr">${s.attend!=null?s.attend+'/'+s.threshold23:'—'}</td>`;
     h+=`<td class="tc">${s.attend!=null?(s.attendTarget?'<span class="badge badge-red">미달</span>':'<span class="badge badge-green">충족</span>'):''}</td>`;
     // Status dropdown: 재학/위탁/예방지도이수
-    if(s.isMidal){
-      const val=s.status==='위탁'?'위탁':(s.preventionDone?'이수':'미이수');
+    const st=s.status||'재학';
+    if(s.isMidal||st!=='재학'){
       h+=`<td class="tc"><select class="isel" onchange="chgStatus('${s.class}','${s.num}',this.value)">
-        <option value="미이수" ${val==='미이수'?'selected':''}>미이수</option>
-        <option value="이수" ${val==='이수'?'selected':''}>이수</option>
-        <option value="위탁" ${val==='위탁'?'selected':''}>위탁(제외)</option></select></td>`;
+        <option value="재학" ${st==='재학'&&!s.preventionDone?'selected':''}>—</option>
+        <option value="예방지도이수" ${s.preventionDone&&st==='재학'?'selected':''}>예방지도이수</option>
+        <option value="자퇴" ${st==='자퇴'?'selected':''}>자퇴</option>
+        <option value="위탁" ${st==='위탁'?'selected':''}>위탁</option>
+        <option value="휴학" ${st==='휴학'?'selected':''}>휴학</option></select></td>`;
     }else{
-      h+=`<td class="tc">${s.status==='위탁'?'<span class="badge badge-slate">위탁</span>':'<span style="color:var(--text3)">—</span>'}</td>`;
+      h+=`<td class="tc" style="color:var(--text3)">—</td>`;
     }
-    h+=`<td class="tc">${s.isTarget?'<span class="badge badge-target">대상자</span>':'<span style="color:var(--text3)">—</span>'}</td>`;
-    h+=`<td class="tc"><button class="btn-x" onclick="dropStudent('${s.class}','${s.num}')" title="자퇴 처리 (결과에서 제거)">✕</button></td>`;
+    h+=`<td class="tc">${s.isTarget?'<span class="badge badge-target">대상자</span>':(st!=='재학'?`<span class="badge badge-slate">${st}</span>`:'<span style="color:var(--text3)">—</span>')}</td>`;
     h+=`</tr>`;
   });
   h+=`</tbody></table></div></div>`;return h}
@@ -406,22 +407,19 @@ function resultSection(subj,r){
 async function chgStatus(cls,num,val){
   const r=getRes(selId);if(!r?.students)return;
   const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
-  if(val==='위탁'){s.status='위탁';s.preventionDone=false;s.isTarget=false}
-  else if(val==='이수'){s.status='재학';s.preventionDone=true;s.isTarget=false}
-  else{s.status='재학';s.preventionDone=false;s.isTarget=s.isMidal}
-  D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name}: ${val}`)}
+  if(val==='재학'){s.status='재학';s.preventionDone=false;s.isTarget=s.isMidal}
+  else if(val==='예방지도이수'){s.status='재학';s.preventionDone=true;s.isTarget=false}
+  else{s.status=val;s.preventionDone=false;s.isTarget=false}
+  D['results_'+selId]=r;render();await apiSave('results_'+selId,r);
+  const labels={'재학':'대상자 복원','예방지도이수':'예방지도 이수 → 대상 제외','자퇴':'자퇴 처리','위탁':'위탁 → 대상 제외','휴학':'휴학 → 대상 제외'};
+  toast(`${s.name}: ${labels[val]||val}`)}
 
-async function dropStudent(cls,num){
-  const r=getRes(selId);if(!r?.students)return;
-  const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
-  if(!confirm(`${s.name} (${cls}반 ${num}번)을 자퇴 처리하시겠습니까?\n결과에서 숨겨지며, 데이터 관리 탭에서 복구할 수 있습니다.`))return;
-  s.status='자퇴';s.isTarget=false;
-  D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name} 자퇴 처리`)}
+
 
 /* ─── Manage Page ─── */
 function managePage(subj){
   const r=getRes(selId);
-  const dropped=r?.students?.filter(s=>s.status==='자퇴')||[];
+  const excluded=r?.students?.filter(s=>s.status&&s.status!=='재학')||[];
   let h=`<div class="card"><div class="card-header"><span class="card-title">데이터 관리 — ${esc(subj.name)}</span></div>
 
     <p style="font-size:13px;font-weight:600;margin-bottom:12px">업로드 데이터 초기화</p>
@@ -432,12 +430,13 @@ function managePage(subj){
     </div>
 
     <hr class="sep">
-    <p style="font-size:13px;font-weight:600;margin-bottom:12px">자퇴 처리된 학생 (${dropped.length}명)</p>`;
-  if(!dropped.length)h+=`<p style="font-size:12px;color:var(--text3)">자퇴 처리된 학생이 없습니다</p>`;
+    <p style="font-size:13px;font-weight:600;margin-bottom:12px">제외 처리된 학생 (${excluded.length}명)</p>`;
+  if(!excluded.length)h+=`<p style="font-size:12px;color:var(--text3)">제외 처리된 학생이 없습니다</p>`;
   else{
-    h+=`<div class="table-wrap"><table><thead><tr><th>반</th><th>번호</th><th>성명</th><th class="tc">복구</th></tr></thead><tbody>`;
-    dropped.forEach(s=>{
+    h+=`<div class="table-wrap"><table><thead><tr><th>반</th><th>번호</th><th>성명</th><th class="tc">상태</th><th class="tc">복구</th></tr></thead><tbody>`;
+    excluded.forEach(s=>{
       h+=`<tr><td>${esc(s.class)}</td><td>${s.num}</td><td>${esc(s.name)}</td>
+        <td class="tc"><span class="badge badge-slate">${s.status}</span></td>
         <td class="tc"><button class="btn btn-outline btn-sm" onclick="restoreStudent('${s.class}','${s.num}')">복구</button></td></tr>`;
     });
     h+=`</tbody></table></div>`;
@@ -468,7 +467,7 @@ function expXL(){
       if(c?.perfs)c.perfs.forEach((pf,i)=>{row[pf.name]=s.scores?.perfs?.[i]??''});
       row['환산']=s.converted;row['기준']=c.threshold;row['성적']=s.gradeTarget?'미달':'도달'}
     row['출석']=s.attend??'';row['출석기준']=s.threshold23;row['출결']=s.attendTarget?'미달':(s.attend!=null?'충족':'');
-    row['예방지도']=s.preventionDone?'이수':(s.status==='위탁'?'위탁':(s.isMidal?'미이수':''));
+    const expSt=s.status&&s.status!=='재학'?s.status:(s.preventionDone?'예방지도이수':(s.isMidal?'미이수':''));row['상태']=expSt;
     row['최종']=s.isTarget?'대상자':'';row['사유']=(s.reasons||[]).join(', ');return row});
   const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,subj.name.substring(0,31));XLSX.writeFile(wb,`최성보_${subj.name}.xlsx`)}
