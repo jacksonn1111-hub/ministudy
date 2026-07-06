@@ -122,25 +122,31 @@ function subjPage(){
   <button class="btn btn-primary" onclick="addS()">+ 추가</button>
   </div>`;
 
-  h+=`<div class="card"><div class="card-header"><span class="card-title">등록 과목 (${ss.length})</span></div>`;
-  if(!ss.length)h+=`<div class="empty">등록된 과목이 없습니다</div>`;
-  else ss.forEach((s,i)=>{
-    const c=cfg(s.id),r=res(s.id),hasR=r?.students?.length>0,tN=hasR?r.students.filter(x=>x.isTarget).length:0;
-    const evL=(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결';
-    h+=`<div class="subj-item"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
-      <span style="color:var(--text3);font-size:12px;min-width:20px">${i+1}</span>
-      <strong>${esc(s.name)}</strong><span style="font-size:12px;color:var(--text2)">${esc(s.teacher||'미지정')}</span>
-      <span class="badge badge-slate">${s.grade||'?'}학년 ${esc(deptStr(s))}</span>
-      <span class="badge ${(s.evalType||'both')==='attendanceOnly'?'badge-green':'badge-blue'}">${evL}</span>
-      ${c?'<span class="badge badge-green">설정완료</span>':''}
-      ${hasR?`<span class="badge badge-amber">${r.students.length}명</span>`:''}
-      ${tN>0?`<span class="badge badge-red">대상자 ${tN}</span>`:''}
-    </div><div class="btn-group" style="flex-shrink:0">
-      <button class="btn btn-outline btn-sm" onclick="editS('${s.id}')">수정</button>
-      <button class="btn btn-danger btn-sm" onclick="delS('${s.id}')">삭제</button>
-    </div></div>`;
-  });
-  h+=`</div>`;
+  if(!ss.length){h+=`<div class="card"><div class="empty">등록된 과목이 없습니다</div></div>`}
+  else{
+    ['1','2'].forEach(gr=>{
+      const grSubjs=ss.filter(s=>(s.grade||'1')===gr).sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+      if(!grSubjs.length)return;
+      h+=`<div class="card"><div class="card-header"><span class="card-title">${gr}학년 (${grSubjs.length}개 과목)</span></div>`;
+      grSubjs.forEach((s,i)=>{
+        const c=cfg(s.id),r=res(s.id),hasR=r?.students?.length>0,tN=hasR?r.students.filter(x=>x.isTarget).length:0;
+        const evL=(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결';
+        h+=`<div class="subj-item"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+          <span style="color:var(--text3);font-size:12px;min-width:20px">${i+1}</span>
+          <strong>${esc(s.name)}</strong><span style="font-size:12px;color:var(--text2)">${esc(s.teacher||'미지정')}</span>
+          <span class="badge badge-slate">${esc(deptStr(s))}</span>
+          <span class="badge ${(s.evalType||'both')==='attendanceOnly'?'badge-green':'badge-blue'}">${evL}</span>
+          ${c?'<span class="badge badge-green">설정완료</span>':''}
+          ${hasR?`<span class="badge badge-amber">${r.students.length}명</span>`:''}
+          ${tN>0?`<span class="badge badge-red">대상자 ${tN}</span>`:''}
+        </div><div class="btn-group" style="flex-shrink:0">
+          <button class="btn btn-outline btn-sm" onclick="editS('${s.id}')">수정</button>
+          <button class="btn btn-danger btn-sm" onclick="delS('${s.id}')">삭제</button>
+        </div></div>`;
+      });
+      h+=`</div>`;
+    });
+  }
   // Init dept checkboxes after render
   setTimeout(()=>updDeptChk(),0);
   return h}
