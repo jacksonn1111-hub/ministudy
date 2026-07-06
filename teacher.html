@@ -108,13 +108,19 @@ function parseNEISGrade(buf){
   const wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rng=XLSX.utils.decode_range(ws['!ref']||'A1');
   const raw=[];for(let r=rng.s.r;r<=rng.e.r;r++){const row=[];for(let c=rng.s.c;c<=rng.e.c;c++){const a=XLSX.utils.encode_cell({r,c}),cell=ws[a];row.push(cell?cell.v:null)}raw.push(row)}
   const meta={};let assessments=[];const sections=[];
+  // Scan all rows for section headers and meta
   for(let i=0;i<raw.length;i++){const row=raw[i];const rowStr=row.filter(Boolean).map(String).join(' ');
     const ym=rowStr.match(/(\d+)학년도\s*제?(\d)학기/);if(ym&&!meta.year){meta.year=ym[1];meta.semester=ym[2]}
     const sm=rowStr.match(/^(.+?)\(\d+\)과목/);if(sm&&!meta.subject)meta.subject=sm[1];
     const secM=rowStr.match(/(\d)학년\s+(\S+?)\s+(\d+)강의실/);
-    if(secM){sections.push({startRow:i,grade:secM[1],dept:secM[2],room:secM[3]});if(!meta.grade){meta.grade=secM[1];meta.dept=secM[2]}}
-    if(assessments.length===0){for(let c=0;c<row.length;c++){const v=String(row[c]||''),m=v.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
-      if(m){const nm=m[1].replace(/\n/g,' ').trim();if(!/정기시험|수행평가\(|평가방법/.test(nm))assessments.push({name:nm,ratio:parseFloat(m[2]),colIdx:c})}}}}
+    if(secM){sections.push({startRow:i,grade:secM[1],dept:secM[2],room:secM[3]});if(!meta.grade){meta.grade=secM[1];meta.dept=secM[2]}}}
+  // Find assessment columns: pick the row with the MOST ratio entries (= leaf/detail row)
+  let bestAs=[];
+  for(let i=0;i<Math.min(raw.length,15);i++){const row=raw[i];const rowAs=[];
+    for(let c=0;c<row.length;c++){const v=String(row[c]||''),m=v.match(/(.+?)\((\d+\.?\d*)%\)\s*$/);
+      if(m){const nm=m[1].replace(/\n/g,' ').trim();if(!/평가방법/.test(nm))rowAs.push({name:nm,ratio:parseFloat(m[2]),colIdx:c})}}
+    if(rowAs.length>bestAs.length)bestAs=rowAs}
+  assessments=bestAs;
   function getDept(ri){let d='';for(const s of sections)if(ri>=s.startRow)d=s.dept;return d}
   const students=[];
   for(let i=0;i<raw.length;i++){const row=raw[i];if(!row)continue;let cls=null,num=null,name=null;
