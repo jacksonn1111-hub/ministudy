@@ -153,7 +153,7 @@ function mainPage(){
   if(!ss.length)return`<div class="card empty"><p style="font-size:15px;margin-bottom:8px">등록된 과목이 없습니다</p><p>관리자가 과목을 등록하면 나타납니다.</p></div>`;
   let h=`<div class="card"><div class="form-grid"><div class="form-group"><label>과목 선택</label>
     <select onchange="selectSubj(this.value)"><option value="">— 과목을 선택하세요 —</option>
-    ${ss.map(s=>`<option value="${s.id}" ${selId===s.id?'selected':''}>${s.grade||'?'}학년 ${esc(s.dept||'')} | ${esc(s.name)} (${esc(s.teacher||'미지정')}) [${(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결'}]</option>`).join('')}
+    ${ss.map(s=>{const dp=Array.isArray(s.depts)?s.depts.join(', '):(s.dept||'');return`<option value="${s.id}" ${selId===s.id?'selected':''}>${s.grade||'?'}학년 ${esc(dp)} | ${esc(s.name)} (${esc(s.teacher||'미지정')}) [${(s.evalType||'both')==='attendanceOnly'?'출결만':'성적+출결'}]</option>`}).join('')}
     </select></div></div></div>`;
   if(!selId)return h+`<div class="card empty">과목을 선택하세요</div>`;
   const subj=ss.find(s=>s.id===selId);if(!subj)return h;
