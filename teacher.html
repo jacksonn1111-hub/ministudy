@@ -364,12 +364,14 @@ function readCfgDOM(){
 function resultSection(subj,r){
   const c=getCfg(selId),ib=(subj.evalType||'both')!=='attendanceOnly';
   const stu=r.students;
-  const allStu=r.students;
   const cls=[...new Set(stu.map(s=>s.class))].sort((a,b)=>a.localeCompare(b,'ko'));
   const fl=stu.filter(s=>{if(clsFilt&&s.class!==clsFilt)return false;if(onlyMidal&&!s.isMidal)return false;return true});
-  const tot=stu.length,midN=stu.filter(s=>s.isMidal).length,tgtN=stu.filter(s=>s.isTarget).length;
+  const active=stu.filter(s=>!s.status||s.status==='재학');
+  const tot=active.length,midN=active.filter(s=>s.isMidal).length,tgtN=stu.filter(s=>s.isTarget).length;
+  const prevN=stu.filter(s=>s.preventionDone).length;
   const witN=stu.filter(s=>s.status==='위탁').length;
-  const dropN=allStu.filter(s=>s.status==='자퇴').length;
+  const dropN=stu.filter(s=>s.status==='자퇴').length;
+  const restN=stu.filter(s=>s.status==='휴학').length;
 
   let h=`<div class="card"><div class="card-header"><span class="card-title">② 분석 결과</span>
     <button class="btn btn-success btn-sm" onclick="expXL()">📥 엑셀</button></div>
