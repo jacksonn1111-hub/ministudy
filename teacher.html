@@ -137,7 +137,9 @@ function parseNEISAttend(buf){
   const cC=find([/^반$/]),nC=find([/^번호$/]),nmC=find([/^성명$/,/^이름$/]),aC=find([/출석시수/,/출석일수/]),tC=find([/총.*수업시수/]);
   let fth=0;
   const students=rows.map(row=>{const c=String(row[cC]||'').trim(),n=String(row[nC]||'').trim(),nm=String(row[nmC]||'').trim(),att=parseFloat(row[aC])||0;
-    let th=0;if(tC){const tv=String(row[tC]||''),tm=tv.match(/(\d+)/);if(tm)th=parseInt(tm[1])}
+    let th=0;if(tC){const tv=String(row[tC]||'');
+      const pm=tv.match(/\((\d+)\)/);if(pm)th=parseInt(pm[1]);
+      else{const tm=tv.match(/(\d+)/);if(tm)th=parseInt(tm[1])}}
     if(th>fth)fth=th;return{class:c,num:n,name:nm,attend:att,totalHours:th}}).filter(s=>s.class&&s.num&&s.name);
   return{students,fileTotalHours:fth}}
 
@@ -216,7 +218,7 @@ function uploadPage(subj){
       attendFiles.forEach(af=>{af.students.forEach(s=>{if(s.totalHours&&s.class)classHours[s.class]=s.totalHours})});
       const chEntries=Object.entries(classHours).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
       if(chEntries.length){
-        h+=`<div class="auto-msg">✅ 반별 수업시수: ${chEntries.map(([c,t])=>`${c}반 ${t}시간(기준 ${Math.ceil(t*(2/3))}↑)`).join(' · ')}</div>`;
+        h+=`<div class="auto-msg">✅ 반별 학점당시수: ${chEntries.map(([c,t])=>`${c}반 ${t}시간(이수기준 ${Math.ceil(t*(2/3))}↑)`).join(' · ')}</div>`;
       }
     }
   }
