@@ -210,7 +210,15 @@ function uploadPage(subj){
         <button class="btn-x" onclick="attendFiles.splice(${i},1);render()" title="제거">✕</button></div>`;
     });
     h+=`</div>`;
-    if(totalHoursFromFile)h+=`<div class="auto-msg">✅ 수업시수: ${totalHoursFromFile}시간 (파일에서 감지)</div>`;
+    if(attendFiles.length){
+      // Collect per-class hours
+      const classHours={};
+      attendFiles.forEach(af=>{af.students.forEach(s=>{if(s.totalHours&&s.class)classHours[s.class]=s.totalHours})});
+      const chEntries=Object.entries(classHours).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
+      if(chEntries.length){
+        h+=`<div class="auto-msg">✅ 반별 수업시수: ${chEntries.map(([c,t])=>`${c}반 ${t}시간(기준 ${Math.ceil(t*(2/3))}↑)`).join(' · ')}</div>`;
+      }
+    }
   }
 
   // Run button
@@ -227,7 +235,7 @@ function uploadPage(subj){
 
 function cfgSection(){
   // Collect dept list from uploaded grade files
-  const fileDepts=[...new Set(gradeFiles.flatMap(f=>f.students.map(s=>s.dept)).filter(Boolean))];
+  const fileDepts=[...new Set(gradeFiles.flatMap(f=>f.students.map(s=>s.dept)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
   if(!CFG.deptThresholds)CFG.deptThresholds={};
   
   let h=`<div style="margin:12px 0;padding:12px 16px;background:#f8fafc;border-radius:8px">
@@ -282,12 +290,17 @@ async function hAttendMulti(files){
 
 /* ─── Calculation ─── */
 async function runCalc(){
+  try{
   readCfgDOM();
-  const subj=subjs().find(s=>s.id===selId);if(!subj)return;
+  if(!CFG.deptThresholds)CFG.deptThresholds={};
+  const subj=subjs().find(s=>s.id===selId);if(!subj)return toast('과목 선택 필요');
   const ib=(subj.evalType||'both')!=='attendanceOnly';
-  if(ib){let t=(CFG.exam1.enabled?CFG.exam1.ratio:0)+(CFG.exam2.enabled?CFG.exam2.ratio:0);CFG.perfs.forEach(p=>t+=p.ratio);
+  if(ib&&gradeFiles.length>0){let t=(CFG.exam1.enabled?CFG.exam1.ratio:0)+(CFG.exam2.enabled?CFG.exam2.ratio:0);CFG.perfs.forEach(p=>t+=p.ratio);
     if(t!==100)return toast(`반영비율 합계 ${t}% (100% 필요)`)}
-  const cfgCopy=JSON.parse(JSON.stringify(CFG));D['config_'+selId]=cfgCopy;await apiSave('config_'+selId,cfgCopy);
+  toast('분석 중...');
+  await new Promise(r=>setTimeout(r,50));
+  const cfgCopy=JSON.parse(JSON.stringify(CFG));D['config_'+selId]=cfgCopy;
+  apiSave('config_'+selId,cfgCopy).catch(()=>{});
 
   const sm={};
   const prev=getRes(selId),pm={};if(prev?.students)prev.students.forEach(s=>{pm[s.class+'-'+s.num]=s});
@@ -313,12 +326,13 @@ async function runCalc(){
   }
 
   // Merge all attend files
-  const th23=totalHoursFromFile?Math.ceil(totalHoursFromFile*(2/3)):0;
   attendFiles.forEach(af=>{af.students.forEach(s=>{
-    const k=s.class+'-'+s.num;const fileThresh=s.totalHours?Math.ceil(s.totalHours*(2/3)):th23;
-    const at=fileThresh>0?s.attend<fileThresh:false;
-    if(sm[k]){sm[k].attend=s.attend;sm[k].attendTarget=at;sm[k].threshold23=fileThresh||th23}
-    else sm[k]={class:s.class,num:s.num,name:s.name,scores:{},converted:null,gradeTarget:false,attend:s.attend,attendTarget:at,threshold23:fileThresh||th23}})});
+    const k=s.class+'-'+s.num;
+    const sth=s.totalHours||af.fileTotalHours||totalHoursFromFile||0;
+    const th23=sth?Math.ceil(sth*(2/3)):0;
+    const at=th23>0?s.attend<th23:false;
+    if(sm[k]){sm[k].attend=s.attend;sm[k].attendTarget=at;sm[k].threshold23=th23;sm[k].totalHours=sth;if(s.dept)sm[k].dept=sm[k].dept||s.dept}
+    else sm[k]={class:s.class,num:s.num,name:s.name,scores:{},converted:null,gradeTarget:false,attend:s.attend,attendTarget:at,threshold23:th23,totalHours:sth,dept:s.dept||''}})});
 
   const students=Object.values(sm).map(s=>{
     const isMidal=ib?(s.gradeTarget||(s.attendTarget??false)):(s.attendTarget??false);
@@ -335,7 +349,8 @@ async function runCalc(){
   const result={students,updatedAt:new Date().toISOString()};D['results_'+selId]=result;render();
   await apiSave('results_'+selId,result);
   const active=students.filter(s=>s.status!=='자퇴');
-  toast(`${active.length}명 분석 · 대상자 ${students.filter(s=>s.isTarget).length}명 · 저장 ✓`)}
+  toast(`${active.length}명 분석 · 대상자 ${students.filter(s=>s.isTarget).length}명 · 저장 ✓`);
+  }catch(e){console.error(e);toast('오류: '+e.message)}}
 
 function readCfgDOM(){
   document.querySelectorAll('[onchange*="CFG.threshold"]').forEach(el=>{CFG.threshold=Number(el.value)||40});
