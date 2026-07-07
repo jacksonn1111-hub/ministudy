@@ -240,6 +240,7 @@ function dashPage(){
       <div class="tab-toggle">
         <button class="${dashView==='subject'?'active':''}" onclick="dashView='subject';render()">과목별</button>
         <button class="${dashView==='student'?'active':''}" onclick="dashView='student';render()">학생별</button>
+        <button class="${dashView==='prevention'?'active':''}" onclick="dashView='prevention';render()">예방지도이수</button>
       </div>
       <div class="form-group" style="min-width:80px"><select onchange="dashGradeFilter=this.value;render()" style="padding:5px 8px;font-size:12px">
         <option value="">전체학년</option><option value="1" ${dashGradeFilter==='1'?'selected':''}>1학년</option><option value="2" ${dashGradeFilter==='2'?'selected':''}>2학년</option>
@@ -273,6 +274,32 @@ function dashPage(){
       });
       h+=`</tbody></table></div>`}
   }
+  if(dashView==='prevention'){
+    // Collect all 예방지도이수 students
+    const prevStudents=[];
+    ss.forEach(s=>{const r=res(s.id);if(!r?.students)return;
+      r.students.filter(x=>x.preventionDone&&(x.status||'재학')==='재학').forEach(x=>{
+        prevStudents.push({...x,sn:s.name,tc:s.teacher,grade:s.grade})})});
+    // Also group by student
+    const prevMap={};
+    prevStudents.forEach(s=>{const k=`${s.grade}_${s.class}_${s.num}_${s.name}`;
+      if(!prevMap[k])prevMap[k]={grade:s.grade,class:s.class,num:s.num,name:s.name,subjects:[]};
+      prevMap[k].subjects.push(s.sn)});
+    let prevList=Object.values(prevMap);
+    if(dashGradeFilter)prevList=prevList.filter(s=>(s.grade||'')===dashGradeFilter);
+    prevList.sort((a,b)=>{if(a.grade!==b.grade)return(a.grade||'').localeCompare(b.grade||'');if(a.class!==b.class)return a.class.localeCompare(b.class,'ko');return parseInt(a.num)-parseInt(b.num)});
+    
+    if(!prevList.length)h+=`<div class="empty">예방지도 이수 학생이 없습니다</div>`;
+    else{
+      h+=`<p style="font-size:12px;color:var(--text2);margin-bottom:8px">미달이었으나 예방지도를 이수하여 대상에서 제외된 학생 ${prevList.length}명</p>`;
+      h+=`<div class="table-wrap"><table><thead><tr><th>학년</th><th>반</th><th>번호</th><th>성명</th><th>이수 과목</th></tr></thead><tbody>`;
+      prevList.forEach(s=>{
+        h+=`<tr><td class="tc">${s.grade||''}학년</td><td>${esc(s.class)}</td><td>${s.num}</td><td style="font-weight:600">${esc(s.name)}</td>
+        <td>${s.subjects.map(sub=>`<span class="badge badge-green">${esc(sub)}</span>`).join(' ')}</td></tr>`;
+      });
+      h+=`</tbody></table></div>`}
+  }
+
   h+=`</div>`;return h}
 
 function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
