@@ -185,10 +185,16 @@ function uploadPage(subj){
     <div class="file-upload" style="margin-bottom:8px"><input type="file" accept=".xlsx,.xls" multiple onchange="hGradeMulti(this.files)">
       <div style="font-size:20px">📊</div><div style="font-size:13px;color:var(--text2)">나이스 성적 일람표 (여러 파일 선택 가능)</div></div>`;
     if(gradeFiles.length){
+      // Show per-class summary
+      const classInfo={};
+      gradeFiles.forEach((f,fi)=>{const classes=new Set(f.students.map(s=>s.class));
+        classes.forEach(c=>{const cnt=f.students.filter(s=>s.class===c).length;
+          classInfo[c]={file:f.name,count:cnt,dept:f.students.find(s=>s.class===c)?.dept||'',fileIdx:fi}})});
+      const sortedClasses=Object.entries(classInfo).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
       h+=`<div class="file-list">`;
-      gradeFiles.forEach((f,i)=>{
-        h+=`<div class="file-item"><span>📄 ${esc(f.name)} — ${f.students.length}명${f.meta?.dept?' ('+f.meta.dept+')':''}</span>
-          <button class="btn-x" onclick="gradeFiles.splice(${i},1);render()" title="제거">✕</button></div>`;
+      sortedClasses.forEach(([cls,info])=>{
+        h+=`<div class="file-item"><span>📄 <strong>${cls}반</strong>${info.dept?' ('+esc(info.dept)+')':''} — ${info.count}명 <span style="color:var(--text3);font-size:11px">${esc(info.file)}</span></span>
+          <label class="btn-outline btn-sm" style="cursor:pointer;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid var(--border)">교체<input type="file" accept=".xlsx,.xls" style="display:none" onchange="replaceGradeClass('${cls}',this.files[0])"></label></div>`;
       });
       h+=`</div>`;
       // Show auto-detected assessments from first file
@@ -206,10 +212,15 @@ function uploadPage(subj){
   <div class="file-upload" style="margin-bottom:8px"><input type="file" accept=".xlsx,.xls" multiple onchange="hAttendMulti(this.files)">
     <div style="font-size:20px">📋</div><div style="font-size:13px;color:var(--text2)">나이스 과목별출결현황 (여러 파일 선택 가능)</div></div>`;
   if(attendFiles.length){
+    const aClassInfo={};
+    attendFiles.forEach((f,fi)=>{const classes=new Set(f.students.map(s=>s.class));
+      classes.forEach(c=>{const stu=f.students.filter(s=>s.class===c);
+        aClassInfo[c]={file:f.name,count:stu.length,hours:stu[0]?.totalHours||0,fileIdx:fi}})});
+    const aSorted=Object.entries(aClassInfo).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
     h+=`<div class="file-list">`;
-    attendFiles.forEach((f,i)=>{
-      h+=`<div class="file-item"><span>📄 ${esc(f.name)} — ${f.students.length}명</span>
-        <button class="btn-x" onclick="attendFiles.splice(${i},1);render()" title="제거">✕</button></div>`;
+    aSorted.forEach(([cls,info])=>{
+      h+=`<div class="file-item"><span>📄 <strong>${cls}반</strong> — ${info.count}명${info.hours?' · '+info.hours+'시간':''} <span style="color:var(--text3);font-size:11px">${esc(info.file)}</span></span>
+        <label class="btn-outline btn-sm" style="cursor:pointer;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid var(--border)">교체<input type="file" accept=".xlsx,.xls" style="display:none" onchange="replaceAttendClass('${cls}',this.files[0])"></label></div>`;
     });
     h+=`</div>`;
     if(attendFiles.length){
@@ -269,7 +280,16 @@ function cfgSection(){
 async function hGradeMulti(files){
   for(const f of files){try{const buf=await f.arrayBuffer();const d=parseNEISGrade(buf);
     if(d.students.length===0){toast(`${f.name}: 학생 없음`);continue}
-    d.name=f.name;gradeFiles.push(d);
+    d.name=f.name;
+    // Auto-replace: remove old files with overlapping classes
+    const newClasses=new Set(d.students.map(s=>s.class));
+    const replaced=[];
+    gradeFiles=gradeFiles.filter(gf=>{
+      const overlap=[...new Set(gf.students.map(s=>s.class))].some(c=>newClasses.has(c));
+      if(overlap)replaced.push(...[...new Set(gf.students.map(s=>s.class))].filter(c=>newClasses.has(c)));
+      return!overlap});
+    gradeFiles.push(d);
+    if(replaced.length)toast(`${replaced.map(c=>c+'반').join(',')} 데이터 교체됨`);
   }catch(e){toast(`${f.name}: 오류`)}}
   // Auto-fill config from first file's assessments
   if(gradeFiles.length){
@@ -285,8 +305,16 @@ async function hGradeMulti(files){
 async function hAttendMulti(files){
   for(const f of files){try{const buf=await f.arrayBuffer();const d=parseNEISAttend(buf);
     if(d.students.length===0){toast(`${f.name}: 학생 없음`);continue}
-    d.name=f.name;attendFiles.push(d);
+    d.name=f.name;
+    const newClasses=new Set(d.students.map(s=>s.class));
+    const replaced=[];
+    attendFiles=attendFiles.filter(af=>{
+      const overlap=[...new Set(af.students.map(s=>s.class))].some(c=>newClasses.has(c));
+      if(overlap)replaced.push(...[...new Set(af.students.map(s=>s.class))].filter(c=>newClasses.has(c)));
+      return!overlap});
+    attendFiles.push(d);
     if(d.fileTotalHours>totalHoursFromFile)totalHoursFromFile=d.fileTotalHours;
+    if(replaced.length)toast(`출결 ${replaced.map(c=>c+'반').join(',')} 교체됨`);
   }catch(e){toast(`${f.name}: 오류`)}}
   toast(`출결 파일 ${attendFiles.length}개, 총 ${attendFiles.reduce((a,f)=>a+f.students.length,0)}명`);render()}
 
@@ -476,6 +504,36 @@ async function restoreStudent(cls,num){
   const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
   s.status='재학';s.isTarget=s.isMidal&&!s.preventionDone;
   D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name} 복구`)}
+
+async function replaceGradeClass(cls,file){
+  if(!file)return;
+  try{const buf=await file.arrayBuffer();const d=parseNEISGrade(buf);
+    if(d.students.length===0)return toast('학생 없음');
+    d.name=file.name;
+    // Remove files containing this class
+    gradeFiles=gradeFiles.map(gf=>{
+      const filtered=gf.students.filter(s=>s.class!==cls);
+      if(filtered.length===0)return null;
+      if(filtered.length<gf.students.length)return{...gf,students:filtered};
+      return gf}).filter(Boolean);
+    gradeFiles.push(d);
+    toast(`${cls}반 성적 교체 완료`);render();
+  }catch(e){toast('오류: '+e.message)}}
+
+async function replaceAttendClass(cls,file){
+  if(!file)return;
+  try{const buf=await file.arrayBuffer();const d=parseNEISAttend(buf);
+    if(d.students.length===0)return toast('학생 없음');
+    d.name=file.name;
+    attendFiles=attendFiles.map(af=>{
+      const filtered=af.students.filter(s=>s.class!==cls);
+      if(filtered.length===0)return null;
+      if(filtered.length<af.students.length)return{...af,students:filtered};
+      return af}).filter(Boolean);
+    attendFiles.push(d);
+    if(d.fileTotalHours>totalHoursFromFile)totalHoursFromFile=d.fileTotalHours;
+    toast(`${cls}반 출결 교체 완료`);render();
+  }catch(e){toast('오류: '+e.message)}}
 
 function selectSubj(id){selId=id;clsFilt='';onlyMidal=false;tab='main';gradeFiles=[];attendFiles=[];totalHoursFromFile=0;if(id)loadCfg(id);render()}
 function saveApi(){const u=document.getElementById('sUrl').value.trim();if(!u)return toast('URL 입력');API=u;localStorage.setItem('mast_api',u);loadData()}
