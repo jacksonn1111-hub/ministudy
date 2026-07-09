@@ -194,7 +194,10 @@ function uploadPage(subj){
       h+=`<div class="file-list">`;
       sortedClasses.forEach(([cls,info])=>{
         h+=`<div class="file-item"><span>📄 <strong>${cls}반</strong>${info.dept?' ('+esc(info.dept)+')':''} — ${info.count}명 <span style="color:var(--text3);font-size:11px">${esc(info.file)}</span></span>
-          <label class="btn-outline btn-sm" style="cursor:pointer;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid var(--border)">교체<input type="file" accept=".xlsx,.xls" style="display:none" onchange="replaceGradeClass('${cls}',this.files[0])"></label></div>`;
+          <span style="display:flex;gap:4px;align-items:center">
+            <label style="cursor:pointer;padding:3px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--blue)">🔄 교체<input type="file" accept=".xlsx,.xls" style="display:none" onchange="replaceGradeClass('${cls}',this.files[0])"></label>
+            <button class="btn-x" onclick="removeGradeClass('${cls}')" title="${cls}반 삭제">✕</button>
+          </span></div>`;
       });
       h+=`</div>`;
       // Show auto-detected assessments from first file
@@ -220,7 +223,10 @@ function uploadPage(subj){
     h+=`<div class="file-list">`;
     aSorted.forEach(([cls,info])=>{
       h+=`<div class="file-item"><span>📄 <strong>${cls}반</strong> — ${info.count}명${info.hours?' · '+info.hours+'시간':''} <span style="color:var(--text3);font-size:11px">${esc(info.file)}</span></span>
-        <label class="btn-outline btn-sm" style="cursor:pointer;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid var(--border)">교체<input type="file" accept=".xlsx,.xls" style="display:none" onchange="replaceAttendClass('${cls}',this.files[0])"></label></div>`;
+        <span style="display:flex;gap:4px;align-items:center">
+          <label style="cursor:pointer;padding:3px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--blue)">🔄 교체<input type="file" accept=".xlsx,.xls" style="display:none" onchange="replaceAttendClass('${cls}',this.files[0])"></label>
+          <button class="btn-x" onclick="removeAttendClass('${cls}')" title="${cls}반 삭제">✕</button>
+        </span></div>`;
     });
     h+=`</div>`;
     if(attendFiles.length){
@@ -504,6 +510,20 @@ async function restoreStudent(cls,num){
   const s=r.students.find(x=>x.class===cls&&x.num===num);if(!s)return;
   s.status='재학';s.isTarget=s.isMidal&&!s.preventionDone;
   D['results_'+selId]=r;render();await apiSave('results_'+selId,r);toast(`${s.name} 복구`)}
+
+function removeGradeClass(cls){
+  gradeFiles=gradeFiles.map(gf=>{
+    const filtered=gf.students.filter(s=>s.class!==cls);
+    if(filtered.length===0)return null;
+    return{...gf,students:filtered}}).filter(Boolean);
+  toast(cls+'반 성적 삭제');render()}
+
+function removeAttendClass(cls){
+  attendFiles=attendFiles.map(af=>{
+    const filtered=af.students.filter(s=>s.class!==cls);
+    if(filtered.length===0)return null;
+    return{...af,students:filtered}}).filter(Boolean);
+  toast(cls+'반 출결 삭제');render()}
 
 async function replaceGradeClass(cls,file){
   if(!file)return;
